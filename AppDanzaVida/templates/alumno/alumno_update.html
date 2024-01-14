@@ -4,7 +4,7 @@
 <br>
 <div class="card" style="width: 100%;">
     <div class="card-body">
-        <h4 class="card-title">Nuevo alumno</h4>
+        <h4 class="card-title">Editar alumno</h4>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
@@ -157,7 +157,7 @@
                 <br>
                 
             </div>
-            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Actualizar</button>
         </form>
     </div>
 </div>
@@ -181,6 +181,14 @@
             camposResponsable1.forEach(campo => campo.removeAttribute('disabled'));
         }
     }
+
+    // Verificar si hay datos en los campos del responsable al cargar
+    let hayDatosResponsable1 = camposResponsable1.some(campo => campo.value !== '');
+
+    if (hayDatosResponsable1) {
+        cargarResponsable1.checked = true;
+    }
+
     cargarResponsable1.addEventListener('change', toggleCamposResponsable1);
     toggleCamposResponsable1();
     });
@@ -203,6 +211,14 @@
             camposResponsable2.forEach(campo => campo.removeAttribute('disabled'));
         }
     }
+
+    // Verificar si hay datos en los campos del responsable al cargar
+    let hayDatosResponsable2 = camposResponsable2.some(campo => campo.value !== '');
+
+    if (hayDatosResponsable2) {
+        cargarResponsable2.checked = true;
+    }
+
     cargarResponsable2.addEventListener('change', toggleCamposResponsable2);
     toggleCamposResponsable2();
     });
@@ -225,6 +241,14 @@
             camposResponsable3.forEach(campo => campo.removeAttribute('disabled'));
         }
     }
+
+    // Verificar si hay datos en los campos del responsable al cargar
+    let hayDatosResponsable3 = camposResponsable3.some(campo => campo.value !== '');
+
+    if (hayDatosResponsable3) {
+        cargarResponsable3.checked = true;
+    }
+    
     cargarResponsable3.addEventListener('change', toggleCamposResponsable3);
     toggleCamposResponsable3();
     });

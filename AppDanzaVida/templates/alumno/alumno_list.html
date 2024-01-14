@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Listado de Alumnos {% if perms.AppDanzaVida.add_alumno %}<a href="{% url 'alumno_create' %}" class="btn float-end" style="background-color: #FF9843;">Nuevo Alumno <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <br>
+    <table id="alumnoTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-3">Nombre y apellido</th>
+                <th scope="col" class="col-1">Teléfono</th>
+                <th scope="col" class="col-2">Responsables</th>
+                <th scope="col" class="col-2">Ficha Médica</th>
+                <th scope="col" class="col-2">Edad</th>
+                <th scope="col" class="col-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alumno in object_list %}
+            <tr>
+                <td>{{ alumno.apellido }}, {{ alumno.nombre }}</td>
+                <td>{{ alumno.telefono }}</td>
+                <td>
+                  {% if alumno.responsable1_nombre %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable1_vinculo}}>
+                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable1Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
+                  </span>
+                  <!-- Modal con los detalles del responsable1 -->
+                  <div class="modal fade" id="responsable1Modal{{ alumno.id }}" tabindex="-1" aria-labelledby="responsable1ModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Datos del responsable</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p><b>Nombre:</b> {{ alumno.responsable1_nombre }} {{ alumno.responsable1_apellido }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.responsable1_vinculo }}</p>
+                            <p><b>Teléfono:</b> {{ alumno.responsable1_telefono }}</p>
+                            <p><b>Email:</b> {{ alumno.responsable1_email }}</p>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  {% if alumno.responsable2_nombre %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable2_vinculo}}>
+                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable2Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
+                  </span>
+                  <!-- Modal con los detalles del responsable2 -->
+                  <div class="modal fade" id="responsable2Modal{{ alumno.id }}" tabindex="-1" aria-labelledby="responsable2ModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Datos del responsable</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p><b>Nombre:</b> {{ alumno.responsable2_nombre }} {{ alumno.responsable2_apellido }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.responsable2_vinculo }}</p>
+                            <p><b>Teléfono:</b> {{ alumno.responsable2_telefono }}</p>
+                            <p><b>Email:</b> {{ alumno.responsable2_email }}</p>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  {% if alumno.responsable3_nombre %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable3_vinculo}}>
+                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable3Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
+                  </span>
+                  <!-- Modal con los detalles del responsable3 -->
+                  <div class="modal fade" id="responsable3Modal{{ alumno.id }}" tabindex="-1" aria-labelledby="responsable3ModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Datos del responsable</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p><b>Nombre:</b> {{ alumno.responsable3_nombre }} {{ alumno.responsable3_apellido }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.responsable3_vinculo }}</p>
+                            <p><b>Teléfono:</b> {{ alumno.responsable3_telefono }}</p>
+                            <p><b>Email:</b> {{ alumno.responsable3_email }}</p>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  
+                </td>
+                <td>{% if alumno.ficha_medica == True %}Sí{% else %}No{% endif %}</td>
+                <td>{{ alumno.fecha_nacimiento }}</td>
+                <td>
+                  {% if perms.AppDanzaVida.change_alumno %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                    <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'alumno_update' alumno.id %}'"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.delete_alumno %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ alumno.id }}"><i class="bi bi-trash"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+            </tr>
+            <!-- Inicio Modal Eliminar -->
+            <div class="modal fade" id="deleteModal{{ alumno.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="text-center">¿Estás seguro de que deseas eliminar a <b>{{ alumno.apellido }}, {{ alumno.nombre }}</b>?</p>
+                    <p class="text-danger text-center"><b>¡Una vez eliminado no podrás recuperarlo!</b></p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{% url 'alumno_delete' alumno.id %}" class="btn btn-danger">Eliminar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Fin Modal Eliminar -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#alumnoTable').DataTable({
+        "order": [[ 0, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}
