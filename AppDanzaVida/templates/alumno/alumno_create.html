@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Nuevo alumno</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Nombre (*)</h6>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Apellido (*)</h6>
+                        {{ form.apellido }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-4">
+                        <h6>DNI (*)</h6>
+                        {{ form.dni }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Fecha de nacimiento (*)</h6>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Fecha de alta (*)</h6>
+                        {{ form.fecha_alta }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Domicilio (*)</h6>
+                        {{ form.domicilio }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Localidad (*)</h6>
+                        {{ form.localidad }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-4">
+                        <h6>Telefono</h6>
+                        {{ form.telefono }}
+                    </div>
+                    <div class="col-8">
+                        <h6>Email</h6>
+                        {{ form.email }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-2">
+                        <h6>Ficha medica</h6>
+                        {{ form.ficha_medica }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Beca</h6>
+                        {{ form.beca }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Descuento</h6>
+                        {{ form.descuento }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Observaciones</h6>
+                        {{ form.observaciones }}
+                    </div>
+                </div>
+                <br>
+                <hr>
+                <div class="form-check form-switch">
+                    <h6>Responsable<input class="form-check-input" type="checkbox" role="switch" id="responsable1"></h6>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        <h6>Nombre</h6>
+                        {{ form.responsable1_nombre }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Apellido (*)</h6>
+                        {{ form.responsable1_apellido }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Vinculo (*)</h6>
+                        {{ form.responsable1_vinculo }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Telefono (*)</h6>
+                        {{ form.responsable1_telefono }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Email (*)</h6>
+                        {{ form.responsable1_email }}
+                    </div>
+                </div>
+                <br>
+                <div class="form-check form-switch">
+                    <h6>Responsable<input class="form-check-input" type="checkbox" role="switch" id="responsable2"></h6>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        <h6>Nombre</h6>
+                        {{ form.responsable2_nombre }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Apellido (*)</h6>
+                        {{ form.responsable2_apellido }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Vinculo (*)</h6>
+                        {{ form.responsable2_vinculo }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Telefono (*)</h6>
+                        {{ form.responsable2_telefono }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Email (*)</h6>
+                        {{ form.responsable2_email }}
+                    </div>
+                </div>
+                <br>
+                <div class="form-check form-switch">
+                    <h6>Responsable<input class="form-check-input" type="checkbox" role="switch" id="responsable3"></h6>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        <h6>Nombre</h6>
+                        {{ form.responsable3_nombre }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Apellido (*)</h6>
+                        {{ form.responsable3_apellido }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Vinculo (*)</h6>
+                        {{ form.responsable3_vinculo }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Telefono (*)</h6>
+                        {{ form.responsable3_telefono }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Email (*)</h6>
+                        {{ form.responsable3_email }}
+                    </div>
+                </div>
+                <br>
+                
+            </div>
+            <button class="btn btn-primary float-end" type="submit">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    /* Habilitar datos responsable 1 */
+    document.addEventListener('DOMContentLoaded', (event) => {
+    let cargarResponsable1 = document.querySelector('#responsable1'); 
+    let camposResponsable1 = [
+        document.querySelector('#responsable1_nombre'),
+        document.querySelector('#responsable1_apellido'),
+        document.querySelector('#responsable1_vinculo'),
+        document.querySelector('#responsable1_telefono'),
+        document.querySelector('#responsable1_email')
+    ];
+
+    function toggleCamposResponsable1() {
+        if (!cargarResponsable1.checked) {
+            camposResponsable1.forEach(campo => campo.setAttribute('disabled', ''));
+        } else {
+            camposResponsable1.forEach(campo => campo.removeAttribute('disabled'));
+        }
+    }
+    cargarResponsable1.addEventListener('change', toggleCamposResponsable1);
+    toggleCamposResponsable1();
+    });
+
+    /* Habilitar datos responsable 2 */
+    document.addEventListener('DOMContentLoaded', (event) => {
+    let cargarResponsable2 = document.querySelector('#responsable2'); 
+    let camposResponsable2 = [
+        document.querySelector('#responsable2_nombre'),
+        document.querySelector('#responsable2_apellido'),
+        document.querySelector('#responsable2_vinculo'),
+        document.querySelector('#responsable2_telefono'),
+        document.querySelector('#responsable2_email')
+    ];
+
+    function toggleCamposResponsable2() {
+        if (!cargarResponsable2.checked) {
+            camposResponsable2.forEach(campo => campo.setAttribute('disabled', ''));
+        } else {
+            camposResponsable2.forEach(campo => campo.removeAttribute('disabled'));
+        }
+    }
+    cargarResponsable2.addEventListener('change', toggleCamposResponsable2);
+    toggleCamposResponsable2();
+    });
+
+    /* Habilitar datos responsable 1 */
+    document.addEventListener('DOMContentLoaded', (event) => {
+    let cargarResponsable3 = document.querySelector('#responsable3'); 
+    let camposResponsable3 = [
+        document.querySelector('#responsable3_nombre'),
+        document.querySelector('#responsable3_apellido'),
+        document.querySelector('#responsable3_vinculo'),
+        document.querySelector('#responsable3_telefono'),
+        document.querySelector('#responsable3_email')
+    ];
+
+    function toggleCamposResponsable3() {
+        if (!cargarResponsable3.checked) {
+            camposResponsable3.forEach(campo => campo.setAttribute('disabled', ''));
+        } else {
+            camposResponsable3.forEach(campo => campo.removeAttribute('disabled'));
+        }
+    }
+    cargarResponsable3.addEventListener('change', toggleCamposResponsable3);
+    toggleCamposResponsable3();
+    });
+</script>
+{% endblock %}

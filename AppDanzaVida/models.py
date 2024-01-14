@@ -3,16 +3,14 @@ from django.utils import timezone
 
 # Create your models here.
 
-class Responsable(models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
-    telefono = models.CharField(max_length=20)
-    email = models.EmailField(max_length=50, blank=True, null=True)
-
-    def __str__(self):
-        return self.apellido + " " + self.nombre
-    
 class Alumno(models.Model):
+    VINCULO = [
+        ('Mamá', 'Mamá'),
+        ('Papá', 'Papá'),
+        ('Hermano', 'Hermano'),
+        ('Abuelo', 'Abuelo'),
+        ('Tio', 'Tio'),
+    ]
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     dni = models.CharField(max_length=10)
@@ -20,13 +18,28 @@ class Alumno(models.Model):
     fecha_alta = models.DateField(default=timezone.now)
     domicilio = models.CharField(max_length=100)
     localidad = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=20)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(max_length=50, blank=True, null=True)
+    observaciones = models.CharField(max_length=400, blank=True, null=True)
     ficha_medica = models.BooleanField(default=False)
-    responsable = models.ManyToManyField(Responsable, blank=True)
     beca = models.BooleanField(default=False)
     descuento = models.PositiveIntegerField(blank=True, null=True)
-
+    responsable1_nombre = models.CharField(max_length=50, blank=True, null=True)
+    responsable1_apellido = models.CharField(max_length=50, blank=True, null=True)
+    responsable1_vinculo = models.CharField(max_length=20, choices=VINCULO, blank=True, null=True)
+    responsable1_telefono = models.CharField(max_length=20, blank=True, null=True)
+    responsable1_email = models.EmailField(max_length=50, blank=True, null=True)
+    responsable2_nombre = models.CharField(max_length=50, blank=True, null=True)
+    responsable2_apellido = models.CharField(max_length=50, blank=True, null=True)
+    responsable2_vinculo = models.CharField(max_length=20, choices=VINCULO, blank=True, null=True)
+    responsable2_telefono = models.CharField(max_length=20, blank=True, null=True)
+    responsable2_email = models.EmailField(max_length=50, blank=True, null=True)
+    responsable3_nombre = models.CharField(max_length=50, blank=True, null=True)
+    responsable3_apellido = models.CharField(max_length=50, blank=True, null=True)
+    responsable3_vinculo = models.CharField(max_length=20, choices=VINCULO, blank=True, null=True)
+    responsable3_telefono = models.CharField(max_length=20, blank=True, null=True)
+    responsable3_email = models.EmailField(max_length=50, blank=True, null=True)
+    
     def __str__(self):
         return self.apellido + " " + self.nombre + " - (DNI: " + self.dni + ")"
     

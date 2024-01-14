@@ -1,11 +1,7 @@
 from django.contrib import admin
-from .models import Responsable, Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Caja, CategoriaCaja, DetalleCaja
+from .models import Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Caja, CategoriaCaja, DetalleCaja
 
 # Register your models here.
-
-class ResponsableAdmin(admin.ModelAdmin):
-    search_fields = ('apellido', 'nombre'),
-    ordering = ['apellido', 'nombre']
 
 class AlumnoAdmin(admin.ModelAdmin):
     search_fields = ('apellido', 'nombre', 'dni'),
@@ -43,7 +39,6 @@ class DetalleCajaAdmin(admin.ModelAdmin):
     search_fields = ('caja', 'categoria', 'monto'),
     ordering = ['caja', 'categoria']
 
-admin.site.register(Responsable, ResponsableAdmin)
 admin.site.register(Alumno, AlumnoAdmin)
 admin.site.register(Sucursal, SucursalAdmin)
 admin.site.register(HorarioDisciplina, HorarioDisciplinaAdmin)
