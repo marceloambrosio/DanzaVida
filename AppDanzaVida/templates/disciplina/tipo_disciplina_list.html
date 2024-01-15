@@ -22,7 +22,13 @@
                 <td>{{ tipo_disciplina.nombre }}</td>
                 <td>{{ tipo_disciplina.descripcion }}</td>
                 <td>${{ tipo_disciplina.precio_por_hora }}</td>
-                <td>{% if tipo_disciplina.activo == true %}Sí{% else %}No{% endif %}</td>
+                <td>
+                  {% if tipo_disciplina.activa == True %}
+                    <span class="badge bg-success rounded-pill">Activo</span>
+                  {% elif tipo_disciplina.activa == False %}
+                    <span class="badge bg-danger rounded-pill">No activo</span>
+                  {% endif %}
+                </td>
                 <td>
                   {% if perms.AppDanzaVida.change_tipo_disciplina %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
