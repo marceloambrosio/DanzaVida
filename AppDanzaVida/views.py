@@ -3,8 +3,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm
+from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina
 
 # Create your views here.
 
@@ -92,6 +92,58 @@ class HorarioDisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, D
     model = HorarioDisciplina
     success_url = reverse_lazy('horario_disciplina_list')
     permission_required = 'AppDanzaVida.delete_horario_disciplina'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class DisciplinaCreateView(CreateView, PermissionRequiredMixin, ListView):
+    model = Disciplina
+    form_class = DisciplinaForm
+    template_name = 'disciplina/disciplina_create.html'
+    success_url = reverse_lazy('disciplina_list')
+    permission_required = 'AppDanzaVida.add_disciplina'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        for horario in self.object.horario.all():
+            horario.libre = False
+            horario.save()
+        return response
+
+class DisciplinaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Disciplina
+    template_name = "disciplina/disciplina_list.html"
+    context_object_name = 'disciplinas'
+    permission_required = 'AppDanzaVida.view_disciplina'
+
+class DisciplinaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Disciplina
+    form_class = DisciplinaForm
+    template_name = 'disciplina/disciplina_update.html'
+    success_url = reverse_lazy('disciplina_list')
+    permission_required = 'AppDanzaVida.change_disciplina'
+
+    def form_valid(self, form):
+        # Guarda los horarios originales antes de la actualización
+        original_horarios = set(self.object.horario.all())
+        response = super().form_valid(form)
+        # Compara los horarios originales con los horarios actualizados
+        updated_horarios = set(self.object.horario.all())
+        added_horarios = updated_horarios - original_horarios
+        removed_horarios = original_horarios - updated_horarios
+        # Actualiza el atributo libre de los horarios añadidos y eliminados
+        for horario in added_horarios:
+            horario.libre = False
+            horario.save()
+        for horario in removed_horarios:
+            horario.libre = True
+            horario.save()
+        return response
+
+class DisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Disciplina
+    success_url = reverse_lazy('disciplina_list')
+    permission_required = 'AppDanzaVida.delete_disciplina'
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

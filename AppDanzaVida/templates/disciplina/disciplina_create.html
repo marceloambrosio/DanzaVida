@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Nueva disciplina</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-4">
+                        <h6>Nombre (*)</h6>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Descripción</h6>
+                        {{ form.descripcion }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Sucursal (*)</h6>
+                        {{ form.sucursal }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-3">
+                        <h6>Fecha Inicio (*)</h6>
+                        {{ form.fecha_inicio }}
+                    </div>
+                    <div class="col-3">
+                        <h6>Fecha Fin (*)</h6>
+                        {{ form.fecha_fin }}
+                    </div>
+                    <div class="col-3">
+                        <h6>Tipo (*)</h6>
+                        {{ form.tipo }}
+                    </div>
+                    <div class="col-3">
+                        <h6>Cantidad de horas (*)</h6>
+                        {{ form.cantidad_horas }}
+                    </div>
+                </div>
+                <br>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Horarios (*)</h6>
+                        <div class="btn-group" data-toggle="buttons" style="overflow: auto; height: 150px; width: 100%; display: block;">
+                            {{ form.horario }}
+                        </div>                                           
+                    </div>
+                </div>
+                <hr>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

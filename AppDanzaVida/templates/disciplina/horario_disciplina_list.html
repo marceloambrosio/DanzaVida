@@ -9,16 +9,18 @@
     <table id="horarioDisciplinaTable" class="table table-hover">
         <thead>
             <tr>
-                <th scope="col" class="col-3">Dia</th>
+                <th scope="col" class="col-2">Sucursal</th>
+                <th scope="col" class="col-2">Dia</th>
                 <th scope="col" class="col-2">Hora Inicio</th>
                 <th scope="col" class="col-2">Hora Fin</th>
-                <th scope="col" class="col-2">Libre</th>
+                <th scope="col" class="col-1">Libre</th>
                 <th scope="col" class="col-3">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for horario_disciplina in object_list %}
             <tr>
+                <td>{{ horario_disciplina.sucursal.nombre }}</td>
                 <td>{{ horario_disciplina.dia }}</td>
                 <td>{{ horario_disciplina.hora_inicio }}</td>
                 <td>{{ horario_disciplina.hora_fin }}</td>

@@ -1,7 +1,8 @@
 from datetime import date
 from django import forms
-from django.forms import TextInput, NumberInput, EmailInput, DateInput, Select
-from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina
+from django.db.models import Q
+from django.forms import CheckboxSelectMultiple, TextInput, NumberInput, EmailInput, DateInput, Select
+from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -51,13 +52,35 @@ class TipoDisciplinaForm(forms.ModelForm):
 class HorarioDisciplinaForm(forms.ModelForm):
     class Meta:
         model = HorarioDisciplina
-        fields = ['dia', 'hora_inicio', 'hora_fin']
+        fields = ['sucursal', 'dia', 'hora_inicio', 'hora_fin']
         widgets = {
+            'sucursal': Select(attrs={'class': 'form-control'}),
             'dia': Select(attrs={'class': 'form-control'}),
             'hora_inicio': TextInput(attrs={'class': 'form-control', 'type': 'time'}),
             'hora_fin': TextInput(attrs={'class': 'form-control', 'type': 'time'}),
         }
+
+class DisciplinaForm(forms.ModelForm):
+    class Meta:
+        model = Disciplina
+        fields = ['nombre', 'descripcion', 'sucursal', 'tipo', 'cantidad_horas', 'horario', 'fecha_inicio', 'fecha_fin']
+        widgets = {
+            'nombre': TextInput(attrs={'class': 'form-control'}),
+            'descripcion': TextInput(attrs={'class': 'form-control'}),
+            'sucursal': Select(attrs={'class': 'form-control'}),
+            'tipo': Select(attrs={'class': 'form-control'}),
+            'cantidad_horas': Select(attrs={'class': 'form-control'}),
+            'horario': CheckboxSelectMultiple(),
+            'fecha_inicio': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_fin': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:  # Si estamos editando una disciplina existente
+            self.fields['horario'].queryset = HorarioDisciplina.objects.filter(Q(libre=True) | Q(disciplina=self.instance))
+        else:  # Si estamos creando una nueva disciplina
+            self.fields['horario'].queryset = HorarioDisciplina.objects.filter(libre=True)
 
 class DetalleCajaForm(forms.ModelForm):
     class Meta:

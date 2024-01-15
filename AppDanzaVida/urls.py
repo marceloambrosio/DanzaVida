@@ -20,4 +20,8 @@ urlpatterns = [
     path('horario_disciplina_list', login_required(HorarioDisciplinaListView.as_view()), name='horario_disciplina_list'),
     path('horario_disciplina_update/<int:pk>', login_required(HorarioDisciplinaUpdateView.as_view()), name='horario_disciplina_update'),
     path('horario_disciplina_delete/<int:pk>', login_required(HorarioDisciplinaDeleteView.as_view()), name='horario_disciplina_delete'),
+    path('disciplina_create', login_required(DisciplinaCreateView.as_view()), name='disciplina_create'),
+    path('disciplina_list', login_required(DisciplinaListView.as_view()), name='disciplina_list'),
+    path('disciplina_update/<int:pk>', login_required(DisciplinaUpdateView.as_view()), name='disciplina_update'),
+    path('disciplina_delete/<int:pk>', login_required(DisciplinaDeleteView.as_view()), name='disciplina_delete'),
 ]

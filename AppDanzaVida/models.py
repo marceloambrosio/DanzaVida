@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 
@@ -54,21 +55,26 @@ class Sucursal(models.Model):
     
 class HorarioDisciplina(models.Model):
     DIAS = [
-        ('Lunes', 'Lunes'),
-        ('Martes', 'Martes'),
-        ('Miercoles', 'Miercoles'),
-        ('Jueves', 'Jueves'),
-        ('Viernes', 'Viernes'),
-        ('Sabado', 'Sabado'),
-        ('Domingo', 'Domingo'),
+        ('1', 'Lunes'),
+        ('2', 'Martes'),
+        ('3', 'Miercoles'),
+        ('4', 'Jueves'),
+        ('5', 'Viernes'),
+        ('6', 'Sabado'),
+        ('7', 'Domingo'),
     ]
+    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='horarios')
     dia = models.CharField(max_length=20, choices=DIAS)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     libre = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ['dia', 'hora_inicio']
+
     def __str__(self):
-        return self.dia + " - " + str(self.hora_inicio) + "-" + str(self.hora_fin)
+        estado = "LIBRE" if self.libre else "OCUPADO"
+        return f"[{self.sucursal.nombre:<10}] {self.get_dia_display():<10} - {self.hora_inicio.strftime('%H:%M')} a {self.hora_fin.strftime('%H:%M')} hs. - {estado:<10}"
     
 class TipoDisciplina(models.Model):
     nombre = models.CharField(max_length=50)
@@ -81,18 +87,22 @@ class TipoDisciplina(models.Model):
     
 class Disciplina(models.Model):
     HORAS = [
-        (0.5, 'Media Hora'),
-        (1, 'Una Hora'),
-        (1.5, 'Una Hora y Media'),
-        (2, 'Dos Horas'),
-        (2.5, 'Dos Horas y Media'),
-        (3, 'Tres Horas'),
+        (Decimal('0.5'), 'Media Hora'),
+        (Decimal('1.0'), 'Una Hora'),
+        (Decimal('1.5'), 'Una Hora y Media'),
+        (Decimal('2.0'), 'Dos Horas'),
+        (Decimal('2.5'), 'Dos Horas y Media'),
+        (Decimal('3.0'), 'Tres Horas'),
+        (Decimal('3.5'), 'Tres Horas y Media'),
+        (Decimal('4.0'), 'Cuatro Horas'),
+        (Decimal('4.5'), 'Cuatro Horas y Media'),
+        (Decimal('5.0'), 'Cinco Horas'),
     ]
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=100, blank=True, null=True)
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='disciplinas')
     tipo = models.ForeignKey(TipoDisciplina, on_delete=models.CASCADE, related_name='disciplinas')
-    cantidad_horas = models.FloatField(choices=HORAS)
+    cantidad_horas = models.DecimalField(choices=HORAS, max_digits=2, decimal_places=1)
     horario = models.ManyToManyField(HorarioDisciplina, blank=True)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()

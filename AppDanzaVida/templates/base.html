@@ -34,9 +34,9 @@
             Alumnos
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'alumno_create' %}">Nuevo</a></li>
-            <hr>
             <li><a class="dropdown-item" href="{% url 'alumno_list' %}">Listado</a></li>
+            <hr>
+            <li><a class="dropdown-item" href="{% url 'alumno_create' %}">Nuevo</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -44,8 +44,12 @@
             Disciplinas
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_list' %}">Listado tipo disciplina</a></li>
-            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_create' %}">Nuevo tipo disciplina</a></li>
+            <li><a class="dropdown-item" href="{% url 'disciplina_list' %}">Listado</a></li>
+            <hr>
+            <li><a class="dropdown-item" href="{% url 'disciplina_create' %}">Nueva</a></li>
+            <hr>
+            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_list' %}">Tipos</a></li>
+            <li><a class="dropdown-item" href="{% url 'horario_disciplina_list' %}">Horarios</a></li>
           </ul>
         </li>
           </li>
