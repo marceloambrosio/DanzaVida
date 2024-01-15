@@ -92,7 +92,13 @@
                   {% endif %}
                   
                 </td>
-                <td>{% if alumno.ficha_medica == True %}Sí{% else %}No{% endif %}</td>
+                <td>
+                  {% if alumno.ficha_medica == True %}
+                    <span class="badge bg-success rounded-pill">Presentada</span>
+                  {% elif alumno.ficha_medica == False %}
+                    <span class="badge bg-danger rounded-pill">No presentada</span>
+                  {% endif %}
+                </td>
                 <td>{{ alumno.fecha_nacimiento }}</td>
                 <td>
                   {% if perms.AppDanzaVida.change_alumno %}

@@ -59,8 +59,14 @@
                         </div>
                     </div>
                     {% endif %}
-                </td>                
-                <td>{% if disciplina.activo == True %}Sí{% else %}No{% endif %}</td>
+                </td>
+                <td>
+                    {% if disciplina.activa == True %}
+                      <span class="badge bg-success rounded-pill">Activa</span>
+                    {% elif disciplina.activa == False %}
+                      <span class="badge bg-danger rounded-pill">No activa</span>
+                    {% endif %}
+                  </td>
                 <td>
                   {% if perms.AppDanzaVida.change_disciplina %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
