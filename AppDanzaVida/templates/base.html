@@ -39,6 +39,15 @@
             <li><a class="dropdown-item" href="{% url 'alumno_list' %}">Listado</a></li>
           </ul>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Disciplinas
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_list' %}">Listado tipo disciplina</a></li>
+            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_create' %}">Nuevo tipo disciplina</a></li>
+          </ul>
+        </li>
           </li>
         </ul>
       </div>

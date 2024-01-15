@@ -1,7 +1,7 @@
 from datetime import date
 from django import forms
 from django.forms import TextInput, NumberInput, EmailInput, DateInput, Select
-from .models import DetalleCaja, Caja, Alumno
+from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -37,6 +37,27 @@ class AlumnoForm(forms.ModelForm):
             'responsable3_telefono': NumberInput(attrs={'class': 'form-control', 'id': 'responsable3_telefono'}),
             'responsable3_email': EmailInput(attrs={'class': 'form-control', 'oninput': 'this.value = this.value.toLowerCase()', 'id': 'responsable3_email'}),
         }
+
+class TipoDisciplinaForm(forms.ModelForm):
+    class Meta:
+        model = TipoDisciplina
+        fields = ['nombre', 'descripcion', 'precio_por_hora']
+        widgets = {
+            'nombre': TextInput(attrs={'class': 'form-control'}),
+            'descripcion': TextInput(attrs={'class': 'form-control'}),
+            'precio_por_hora': NumberInput(attrs={'class': 'form-control'}),
+        }
+
+class HorarioDisciplinaForm(forms.ModelForm):
+    class Meta:
+        model = HorarioDisciplina
+        fields = ['dia', 'hora_inicio', 'hora_fin']
+        widgets = {
+            'dia': Select(attrs={'class': 'form-control'}),
+            'hora_inicio': TextInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fin': TextInput(attrs={'class': 'form-control', 'type': 'time'}),
+        }
+        
 
 class DetalleCajaForm(forms.ModelForm):
     class Meta:

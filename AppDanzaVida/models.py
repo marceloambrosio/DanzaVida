@@ -7,6 +7,7 @@ class Alumno(models.Model):
     VINCULO = [
         ('Mamá', 'Mamá'),
         ('Papá', 'Papá'),
+        ('Tutor', 'Tutor'),
         ('Hermano', 'Hermano'),
         ('Abuelo', 'Abuelo'),
         ('Tio', 'Tio'),

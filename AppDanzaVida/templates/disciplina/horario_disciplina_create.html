@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Nuevo horario disciplina</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-4">
+                        <h6>Día (*)</h6>
+                        {{ form.dia }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Hora Inicio (*)</h6>
+                        {{ form.hora_inicio }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Hora Fin (*)</h6>
+                        {{ form.hora_fin }}
+                    </div>
+                </div>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
