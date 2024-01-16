@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Editar inscripción</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Fecha inscripción (*)</h6>
+                        {{ form.fecha }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Fecha inicio (*)</h6>
+                        {{ form.fecha_inicio }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Alumno (*)</h6>
+                        {{ form.alumno }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Disciplina (*)</h6>
+                        {{ form.disciplina }}
+                    </div>
+                </div>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
+  <script src="{% static 'js/select2.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_alumno').select2();
+        $('#id_disciplina').select2();
+    });
+</script>
+    
+{% endblock %}

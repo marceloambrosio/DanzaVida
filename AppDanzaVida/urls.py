@@ -24,4 +24,8 @@ urlpatterns = [
     path('disciplina_list', login_required(DisciplinaListView.as_view()), name='disciplina_list'),
     path('disciplina_update/<int:pk>', login_required(DisciplinaUpdateView.as_view()), name='disciplina_update'),
     path('disciplina_delete/<int:pk>', login_required(DisciplinaDeleteView.as_view()), name='disciplina_delete'),
+    path('inscripcion_create', login_required(InscripcionCreateView.as_view()), name='inscripcion_create'),
+    path('inscripcion_list', login_required(InscripcionListView.as_view()), name='inscripcion_list'),
+    path('inscripcion_update/<int:pk>', login_required(InscripcionUpdateView.as_view()), name='inscripcion_update'),
+    path('inscripcion_delete/<int:pk>', login_required(InscripcionDeleteView.as_view()), name='inscripcion_delete'),
 ]

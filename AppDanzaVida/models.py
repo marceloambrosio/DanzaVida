@@ -109,18 +109,18 @@ class Disciplina(models.Model):
     activa = models.BooleanField(default=True)
 
     def __str__(self):
-        return "[" + self.sucursal.nombre + "] " + self.nombre
+        return "[" + self.sucursal.nombre + "] " + self.nombre + " (" + self.tipo.nombre + ") - Inicio: " + str(self.fecha_inicio)
 
 class Inscripcion(models.Model):
     fecha = models.DateField(default=timezone.now)
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='inscripciones')
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='inscripciones')
     fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
+    fecha_baja = models.DateField(blank=True, null=True)
     activa = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.disciplina.nombre + " - " + str(self.fecha) + self.alumno.apellido + " " + self.alumno.nombre
+        return self.disciplina.nombre + " - " + str(self.fecha) + " - " + self.alumno.apellido + " " + self.alumno.nombre
     
 class Caja(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')

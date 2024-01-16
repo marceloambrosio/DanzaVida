@@ -3,48 +3,47 @@ from .models import Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Discipl
 
 # Register your models here.
 
+@admin.register(Alumno)
 class AlumnoAdmin(admin.ModelAdmin):
     search_fields = ('apellido', 'nombre', 'dni'),
     ordering = ['apellido', 'nombre']
 
+@admin.register(Sucursal)
 class SucursalAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'direccion', 'localidad'),
     ordering = ['nombre', 'direccion']
 
+@admin.register(HorarioDisciplina)
 class HorarioDisciplinaAdmin(admin.ModelAdmin):
     search_fields = ('dia', 'hora_inicio', 'hora_fin'),
     ordering = ['dia', 'hora_inicio']
 
+@admin.register(TipoDisciplina)
 class TipoDisciplinaAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion'),
     ordering = ['nombre']
 
+@admin.register(Disciplina)
 class DisciplinaAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion'),
     ordering = ['nombre']
 
+@admin.register(Inscripcion)
 class InscripcionAdmin(admin.ModelAdmin):
     search_fields = ('fecha', 'alumno', 'disciplina'),
     ordering = ['alumno', 'disciplina', 'fecha']
 
+@admin.register(Caja)
 class CajaAdmin(admin.ModelAdmin):
     search_fields = ('fecha', 'monto'),
     ordering = ['fecha']
 
+@admin.register(CategoriaCaja)
 class CategoriaCajaAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion', 'tipo'),
     ordering = ['nombre']
 
+@admin.register(DetalleCaja)
 class DetalleCajaAdmin(admin.ModelAdmin):
     search_fields = ('caja', 'categoria', 'monto'),
     ordering = ['caja', 'categoria']
-
-admin.site.register(Alumno, AlumnoAdmin)
-admin.site.register(Sucursal, SucursalAdmin)
-admin.site.register(HorarioDisciplina, HorarioDisciplinaAdmin)
-admin.site.register(TipoDisciplina, TipoDisciplinaAdmin)
-admin.site.register(Disciplina, DisciplinaAdmin)
-admin.site.register(Inscripcion, InscripcionAdmin)
-admin.site.register(Caja, CajaAdmin)
-admin.site.register(CategoriaCaja, CategoriaCajaAdmin)
-admin.site.register(DetalleCaja, DetalleCajaAdmin)

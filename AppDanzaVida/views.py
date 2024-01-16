@@ -3,8 +3,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm
+from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion
 
 # Create your views here.
 
@@ -144,6 +144,45 @@ class DisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVi
     model = Disciplina
     success_url = reverse_lazy('disciplina_list')
     permission_required = 'AppDanzaVida.delete_disciplina'
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # Guarda los horarios antes de la eliminación
+        horarios = set(self.object.horario.all())
+        response = super().delete(request, *args, **kwargs)
+        # Actualiza el atributo libre de los horarios
+        for horario in horarios:
+            horario.libre = True
+            horario.save()
+        return response
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class InscripcionCreateView(CreateView, PermissionRequiredMixin, ListView):
+    model = Inscripcion
+    form_class = InscripcionForm
+    template_name = 'inscripcion/inscripcion_create.html'
+    success_url = reverse_lazy('inscripcion_list')
+    permission_required = 'AppDanzaVida.add_inscripcion'
+
+class InscripcionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Inscripcion
+    template_name = "inscripcion/inscripcion_list.html"
+    context_object_name = 'inscripciones'
+    permission_required = 'AppDanzaVida.view_inscripcion'
+
+class InscripcionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Inscripcion
+    form_class = InscripcionForm
+    template_name = 'inscripcion/inscripcion_update.html'
+    success_url = reverse_lazy('inscripcion_list')
+    permission_required = 'AppDanzaVida.change_inscripcion'
+
+class InscripcionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Inscripcion
+    success_url = reverse_lazy('inscripcion_list')
+    permission_required = 'AppDanzaVida.delete_inscripcion'
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

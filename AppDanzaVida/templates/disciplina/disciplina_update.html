@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 <br>
 <div class="card" style="width: 100%;">
@@ -34,12 +36,12 @@
                         {{ form.fecha_fin }}
                     </div>
                     <div class="col-3">
-                        <h6>Tipo (*)</h6>
-                        {{ form.tipo }}
-                    </div>
-                    <div class="col-3">
                         <h6>Horas semanales (*)</h6>
                         {{ form.cantidad_horas }}
+                    </div>
+                    <div class="col-3">
+                        <h6>Tipo (*)</h6>
+                        {{ form.tipo }}
                     </div>
                 </div>
                 <br>
@@ -54,8 +56,16 @@
                 </div>
                 <hr>
             </div>
-            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Actualizar</button>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
         </form>
     </div>
 </div>
+
+<link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
+  <script src="{% static 'js/select2.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_tipo').select2();
+    });
+</script>
 {% endblock %}

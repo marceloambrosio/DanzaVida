@@ -2,7 +2,7 @@ from datetime import date
 from django import forms
 from django.db.models import Q
 from django.forms import CheckboxSelectMultiple, TextInput, NumberInput, EmailInput, DateInput, Select
-from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina
+from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -81,6 +81,17 @@ class DisciplinaForm(forms.ModelForm):
             self.fields['horario'].queryset = HorarioDisciplina.objects.filter(Q(libre=True) | Q(disciplina=self.instance))
         else:  # Si estamos creando una nueva disciplina
             self.fields['horario'].queryset = HorarioDisciplina.objects.filter(libre=True)
+
+class InscripcionForm(forms.ModelForm):
+    class Meta:
+        model = Inscripcion
+        fields = ['fecha', 'alumno', 'disciplina', 'fecha_inicio']
+        widgets = {
+            'fecha': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'alumno': Select(attrs={'class': 'form-control'}),
+            'disciplina': Select(attrs={'class': 'form-control'}),
+            'fecha_inicio': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
 
 class DetalleCajaForm(forms.ModelForm):
     class Meta:

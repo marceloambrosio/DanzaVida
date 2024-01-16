@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Inscripciones {% if perms.AppDanzaVida.add_inscripcion %}<a href="{% url 'inscripcion_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva inscripción <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <br>
+    <table id="inscripcionTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-4">Disciplina</th>
+                <th scope="col" class="col-4">Alumno</th>
+                <th scope="col" class="col-2">Fecha de Inicio</th>
+                <th scope="col" class="col-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inscripcion in object_list %}
+            <tr>
+                <td>[{{ inscripcion.disciplina.sucursal.nombre }}] {{ inscripcion.disciplina.nombre }}</td>
+                <td>{{ inscripcion.alumno.apellido }}, {{ inscripcion.alumno.nombre }}</td>
+                {% load tz %}
+                {% now "Y-m-d" as today %}
+                {% if inscripcion.activa == False %}
+                  <td><span class="badge bg-danger">Finalizada</span></td>
+                {% else %}
+                  {% if inscripcion.fecha_inicio|date:"Y-m-d" > today %}
+                    <td><span class="badge bg-success">{{ inscripcion.fecha_inicio|date:"d/m/Y" }}</span></td>
+                  {% else %}
+                    <td><span class="badge bg-warning">{{ inscripcion.fecha_inicio|date:"d/m/Y" }}</span></td>
+                  {% endif %}
+                {% endif %}
+                <td>
+                  {% if perms.AppDanzaVida.change_inscripcion %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                    <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'inscripcion_update' inscripcion.id %}'"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.delete_inscripcion %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ inscripcion.id }}"><i class="bi bi-trash"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              <!-- Inicio Modal Eliminar -->
+              <div class="modal fade" id="deleteModal{{ inscripcion.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="text-center">¿Estás seguro de que deseas eliminar la inscripción de <b>{{ inscripcion.alumno.apellido }} {{ inscripcion.alumno.nombre }}</b> para la disciplina <b>{{ inscripcion.disciplina.nombre }} ({{ inscripcion.disciplina.sucursal.nombre }})</b>?</p>
+                      <p class="text-danger text-center"><b>¡Una vez eliminado no podrás recuperarlo!</b></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <a href="{% url 'inscripcion_delete' inscripcion.id %}" class="btn btn-danger">Eliminar</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Eliminar -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#inscripcionTable').DataTable({
+        "order": [[ 0, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}
