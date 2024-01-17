@@ -22,8 +22,8 @@
             <tr>
                 <td>{{ horario_disciplina.sucursal.nombre }}</td>
                 <td>{{ horario_disciplina.get_dia_display }}</td>
-                <td>{{ horario_disciplina.hora_inicio }}</td>
-                <td>{{ horario_disciplina.hora_fin }}</td>
+                <td>{{ horario_disciplina.hora_inicio|date:"H:i" }} hs.</td>
+                <td>{{ horario_disciplina.hora_fin|date:"H:i" }} hs.</td>
                 <td>
                   {% if horario_disciplina.libre == True %}
                     <span class="badge bg-success rounded-pill">Libre</span>

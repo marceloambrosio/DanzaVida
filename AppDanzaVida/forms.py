@@ -63,13 +63,12 @@ class HorarioDisciplinaForm(forms.ModelForm):
 class DisciplinaForm(forms.ModelForm):
     class Meta:
         model = Disciplina
-        fields = ['nombre', 'descripcion', 'sucursal', 'tipo', 'cantidad_horas', 'horario', 'fecha_inicio', 'fecha_fin']
+        fields = ['nombre', 'descripcion', 'sucursal', 'tipo', 'horario', 'fecha_inicio', 'fecha_fin']
         widgets = {
             'nombre': TextInput(attrs={'class': 'form-control'}),
             'descripcion': TextInput(attrs={'class': 'form-control'}),
             'sucursal': Select(attrs={'class': 'form-control'}),
             'tipo': Select(attrs={'class': 'form-control'}),
-            'cantidad_horas': Select(attrs={'class': 'form-control'}),
             'horario': CheckboxSelectMultiple(),
             'fecha_inicio': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'fecha_fin': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -81,6 +80,14 @@ class DisciplinaForm(forms.ModelForm):
             self.fields['horario'].queryset = HorarioDisciplina.objects.filter(Q(libre=True) | Q(disciplina=self.instance))
         else:  # Si estamos creando una nueva disciplina
             self.fields['horario'].queryset = HorarioDisciplina.objects.filter(libre=True)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.save()
+        self.save_m2m()
+        instance.horas_semanales = sum(horario.cantidad_horas for horario in instance.horario.all())
+        instance.save(update_fields=['horas_semanales'])
+        return instance
 
 class InscripcionForm(forms.ModelForm):
     class Meta:

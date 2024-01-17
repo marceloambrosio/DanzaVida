@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db import models
 from django.utils import timezone
+from datetime import datetime, date
 
 # Create your models here.
 
@@ -68,6 +69,11 @@ class HorarioDisciplina(models.Model):
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     libre = models.BooleanField(default=True)
+    cantidad_horas = models.DecimalField(max_digits=4, decimal_places=2, default=0.0, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.cantidad_horas = (datetime.combine(date.min, self.hora_fin) - datetime.combine(date.min, self.hora_inicio)).seconds / 3600
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['dia', 'hora_inicio']
@@ -86,23 +92,11 @@ class TipoDisciplina(models.Model):
         return self.nombre + " - " + self.descripcion
     
 class Disciplina(models.Model):
-    HORAS = [
-        (Decimal('0.5'), 'Media Hora'),
-        (Decimal('1.0'), 'Una Hora'),
-        (Decimal('1.5'), 'Una Hora y Media'),
-        (Decimal('2.0'), 'Dos Horas'),
-        (Decimal('2.5'), 'Dos Horas y Media'),
-        (Decimal('3.0'), 'Tres Horas'),
-        (Decimal('3.5'), 'Tres Horas y Media'),
-        (Decimal('4.0'), 'Cuatro Horas'),
-        (Decimal('4.5'), 'Cuatro Horas y Media'),
-        (Decimal('5.0'), 'Cinco Horas'),
-    ]
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=100, blank=True, null=True)
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='disciplinas')
     tipo = models.ForeignKey(TipoDisciplina, on_delete=models.CASCADE, related_name='disciplinas')
-    cantidad_horas = models.DecimalField(choices=HORAS, max_digits=2, decimal_places=1)
+    horas_semanales = models.DecimalField(max_digits=4, decimal_places=2, default=0.0)
     horario = models.ManyToManyField(HorarioDisciplina, blank=True)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
