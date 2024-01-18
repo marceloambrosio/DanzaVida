@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Cuotas de {{ cuota.nombre }}</h2>
+    <br>
+    <table id="detalleCuotaTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-4">Alumno</th>
+                <th scope="col" class="col-3">Disciplina</th>
+                <th scope="col" class="col-2">Monto</th>
+                <th scope="col" class="col-1">Pagado</th>
+                <th scope="col" class="col-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle_cuota in object_list %}
+            <tr>
+                <td>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }} {% if detalle_cuota.alumno.beca == True %}<span class="badge" style="background-color: #FFBB64;">Beca: {{ detalle_cuota.alumno.descuento }}%</span>{% endif %}</td>
+                <td>{{ detalle_cuota.disciplina.nombre }} ({{ detalle_cuota.disciplina.sucursal.nombre }})</td>
+                <td>${{ detalle_cuota.monto }}</td>
+                <td>
+                  {% if detalle_cuota.pagada == True %}
+                  <span class="badge bg-info">Pagada</span>
+                  {% else %}
+                  <span class="badge bg-danger">Adeuda</span>
+                  {% endif %}</td>
+                <td>
+                  {% if perms.AppDanzaVida.change_detallecuota %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuota">
+                    <button type="button" class="btn" style="background-color: #9DBC98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.delete_detallecuota %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ detalle_cuota.id }}"><i class="bi bi-trash"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              <!-- Inicio Modal Editar -->
+              <div class="modal fade" id="editModal{{ detalle_cuota.id }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">Actualizar monto</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form method="post" action="{% url 'detalle_cuota_update' detalle_cuota.id %}">
+                              <p>Estás modificando la cuota de la disciplina <b>{{ detalle_cuota.disciplina.nombre }} ({{ detalle_cuota.disciplina.sucursal.nombre}})</b> del alumno/a <b>{{ detalle_cuota.alumno.nombre }} {{ detalle_cuota.alumno.nombre }}</b>.</p>
+                                {% csrf_token %}
+                                <label for="monto">Monto:</label>
+                                <input type="number" id="monto" name="monto" value="{{ detalle_cuota.monto }}" class="form-control">
+                                <br>
+                                <button type="submit" class="btn float-end" style="background-color: #FF9843;">Guardar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <!-- Fin Modal Editar -->
+              <!-- Inicio Modal Eliminar -->
+              <div class="modal fade" id="deleteModal{{ detalle_cuota.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="text-center">¿Estás seguro de que deseas eliminar la cuota de <b>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</b> de la disciplina <b>{{ detalle_cuota.disciplina.nombre}} ({{ detalle_cuota.disciplina.sucursal.nombre}})</b>?</p>
+                      <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <a href="{% url 'detalle_cuota_delete' detalle_cuota.id %}" class="btn btn-danger">Eliminar</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Eliminar -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#detalleCuotaTable').DataTable({
+        "order": [[ 0, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}

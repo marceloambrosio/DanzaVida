@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from datetime import datetime, date
+import math
 
 # Create your models here.
 
@@ -115,7 +116,51 @@ class Inscripcion(models.Model):
 
     def __str__(self):
         return self.disciplina.nombre + " - " + str(self.fecha) + " - " + self.alumno.apellido + " " + self.alumno.nombre
+
+class Cuota(models.Model):
+    nombre = models.CharField(max_length=50)
+    fecha_generacion = models.DateField(default=timezone.now)
+    fecha_vencimiento = models.DateField()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Guarda la cuota primero
+
+        # Verifica si la cuota ya tiene detalles
+        ya_tiene_detalles = self.detalles.exists()
+
+        # Si la cuota no tiene detalles, los genera
+        if not ya_tiene_detalles:
+            self.generar_detalles()  # Luego genera los detalles
+
+    def generar_detalles(self):
+        inscripciones_activas = Inscripcion.objects.filter(activa=True)
+        for inscripcion in inscripciones_activas:
+            monto = inscripcion.disciplina.tipo.precio_por_hora * inscripcion.disciplina.horas_semanales
+            if inscripcion.alumno.beca:
+                monto = monto * (100 - inscripcion.alumno.descuento) / 100
+            # Redondea el monto hacia arriba al múltiplo de 10 más cercano
+            monto = math.ceil(monto / Decimal(10.0)) * 10
+            DetalleCuota.objects.create(
+                cuota=self,
+                alumno=inscripcion.alumno,
+                disciplina=inscripcion.disciplina,
+                monto=monto,
+                pagada=False,
+            )
     
+    def __str__(self):
+        return self.nombre + " - " + str(self.fecha_vencimiento)
+
+class DetalleCuota(models.Model):
+    cuota = models.ForeignKey(Cuota, on_delete=models.CASCADE, related_name='detalles')
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=6, decimal_places=2)
+    pagada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.cuota.nombre} - {self.alumno.nombre} {self.alumno.apellido} - {self.disciplina.nombre} - ${self.monto}'
+
 class Caja(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')
     fecha = models.DateField(default=timezone.now)

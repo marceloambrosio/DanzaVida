@@ -28,4 +28,11 @@ urlpatterns = [
     path('inscripcion_list', login_required(InscripcionListView.as_view()), name='inscripcion_list'),
     path('inscripcion_update/<int:pk>', login_required(InscripcionUpdateView.as_view()), name='inscripcion_update'),
     path('inscripcion_delete/<int:pk>', login_required(InscripcionDeleteView.as_view()), name='inscripcion_delete'),
+    path('cuota_create', login_required(CuotaCreateView.as_view()), name='cuota_create'),
+    path('cuota_list', login_required(CuotaListView.as_view()), name='cuota_list'),
+    path('cuota_update/<int:pk>', login_required(CuotaUpdateView.as_view()), name='cuota_update'),
+    path('cuota_delete/<int:pk>', login_required(CuotaDeleteView.as_view()), name='cuota_delete'),
+    path('detalle_cuota_list/<int:pk>', login_required(DetalleCuotaListView.as_view()), name='detalle_cuota_list'),
+    path('detalle_cuota_update/<int:pk>', login_required(DetalleCuotaUpdateView.as_view()), name='detalle_cuota_update'),
+    path('detalle_cuota_delete/<int:pk>', login_required(DetalleCuotaDeleteView.as_view()), name='detalle_cuota_delete'),
 ]

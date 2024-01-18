@@ -3,8 +3,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm
+from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota
 
 # Create your views here.
 
@@ -12,7 +12,7 @@ class HomeView(View):
     def get(self, request):
         return render(request, 'home.html')
     
-class AlumnoCreateView(CreateView, PermissionRequiredMixin, ListView):
+class AlumnoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Alumno
     form_class = AlumnoForm
     template_name = 'alumno/alumno_create.html'
@@ -40,7 +40,7 @@ class AlumnoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
-class TipoDisciplinaCreateView(CreateView, PermissionRequiredMixin, ListView):
+class TipoDisciplinaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = TipoDisciplina
     form_class = TipoDisciplinaForm
     template_name = 'disciplina/tipo_disciplina_create.html'
@@ -68,7 +68,7 @@ class TipoDisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Dele
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
-class HorarioDisciplinaCreateView(CreateView, PermissionRequiredMixin, ListView):
+class HorarioDisciplinaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = HorarioDisciplina
     form_class = HorarioDisciplinaForm
     template_name = 'disciplina/horario_disciplina_create.html'
@@ -96,7 +96,7 @@ class HorarioDisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, D
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
-class DisciplinaCreateView(CreateView, PermissionRequiredMixin, ListView):
+class DisciplinaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Disciplina
     form_class = DisciplinaForm
     template_name = 'disciplina/disciplina_create.html'
@@ -159,7 +159,7 @@ class DisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVi
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
-class InscripcionCreateView(CreateView, PermissionRequiredMixin, ListView):
+class InscripcionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Inscripcion
     form_class = InscripcionForm
     template_name = 'inscripcion/inscripcion_create.html'
@@ -183,6 +183,67 @@ class InscripcionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     model = Inscripcion
     success_url = reverse_lazy('inscripcion_list')
     permission_required = 'AppDanzaVida.delete_inscripcion'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class CuotaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Cuota
+    form_class = CuotaForm
+    template_name = 'cuota/cuota_create.html'
+    success_url = reverse_lazy('cuota_list')
+    permission_required = 'AppDanzaVida.add_cuota'
+
+class CuotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Cuota
+    template_name = "cuota/cuota_list.html"
+    context_object_name = 'cuotas'
+    permission_required = 'AppDanzaVida.view_cuota'
+
+class CuotaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Cuota
+    form_class = CuotaForm
+    template_name = 'cuota/cuota_update.html'
+    success_url = reverse_lazy('cuota_list')
+    permission_required = 'AppDanzaVida.change_cuota'
+
+class CuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Cuota
+    success_url = reverse_lazy('cuota_list')
+    permission_required = 'AppDanzaVida.delete_cuota'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class DetalleCuotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = DetalleCuota
+    template_name = "cuota/detalle_cuota_list.html"
+    context_object_name = 'detalles_cuota'
+    permission_required = 'AppDanzaVida.view_detallecuota'
+
+    def get_queryset(self):
+        return DetalleCuota.objects.filter(cuota__id=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cuota'] = Cuota.objects.get(id=self.kwargs['pk'])
+        return context
+
+class DetalleCuotaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = DetalleCuota
+    fields = ['monto']
+    template_name = 'cuota/detalle_cuota_update.html'
+    permission_required = 'AppDanzaVida.change_detallecuota'
+
+    def get_success_url(self):
+        return reverse_lazy('detalle_cuota_list', kwargs={'pk': self.object.cuota.id})
+    
+class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = DetalleCuota
+    permission_required = 'AppDanzaVida.delete_detallecuota'
+
+    def get_success_url(self):
+        return reverse_lazy('detalle_cuota_list', kwargs={'cuota_id': self.object.cuota.id})
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

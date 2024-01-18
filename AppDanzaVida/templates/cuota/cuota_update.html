@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Editar cuota</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-8">
+                        <h6>Nombre (*)</h6>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Fecha de vencimiento (*)</h6>
+                        {{ form.fecha_vencimiento }}
+                    </div>
+                </div>
+                <br>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Actualizar</button>
+        </form>
+    </div>
+</div>
+    
+{% endblock %}

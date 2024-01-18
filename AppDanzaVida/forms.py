@@ -2,7 +2,7 @@ from datetime import date
 from django import forms
 from django.db.models import Q
 from django.forms import CheckboxSelectMultiple, TextInput, NumberInput, EmailInput, DateInput, Select
-from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion
+from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -98,6 +98,15 @@ class InscripcionForm(forms.ModelForm):
             'alumno': Select(attrs={'class': 'form-control'}),
             'disciplina': Select(attrs={'class': 'form-control'}),
             'fecha_inicio': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+class CuotaForm(forms.ModelForm):
+    class Meta:
+        model = Cuota
+        fields = ['nombre', 'fecha_vencimiento']
+        widgets = {
+            'nombre': TextInput(attrs={'class': 'form-control'}),
+            'fecha_vencimiento': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
 class DetalleCajaForm(forms.ModelForm):
