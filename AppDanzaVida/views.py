@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
@@ -39,6 +39,38 @@ class AlumnoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+    
+# Vista para listar las disciplinas de un alumno
+class AlumnoDisciplinasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Disciplina
+    template_name = "alumno/alumno_disciplinas.html" 
+    context_object_name = 'alumno_disciplinas'
+    permission_required = 'AppDanzaVida.view_disciplina'
+
+    def get_queryset(self):
+        self.alumno = get_object_or_404(Alumno, id=self.kwargs['alumno_id'])
+        return self.alumno.inscripciones.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['alumno'] = self.alumno
+        return context
+
+# Vista para listar las cuotas de un alumno
+class AlumnoCuotasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Cuota
+    template_name = "alumno/alumno_cuotas.html"
+    context_object_name = 'alumno_cuotas'
+    permission_required = 'AppDanzaVida.view_cuota'
+
+    def get_queryset(self):
+        self.alumno = get_object_or_404(Alumno, id=self.kwargs['alumno_id'])
+        return self.alumno.detallecuota_set.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['alumno'] = self.alumno
+        return context
     
 class TipoDisciplinaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = TipoDisciplina
@@ -158,6 +190,17 @@ class DisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVi
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+
+# Vista para listar los alumnos inscritos en una disciplina
+class DisciplinaAlumnosListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Alumno
+    template_name = "disciplina/disciplina_alumnos.html"
+    context_object_name = 'disciplina_alumnos'
+    permission_required = 'AppDanzaVida.view_alumno'
+
+    def get_queryset(self):
+        disciplina = get_object_or_404(Disciplina, id=self.kwargs['disciplina_id'])
+        return disciplina.inscripciones.all()
     
 class InscripcionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Inscripcion

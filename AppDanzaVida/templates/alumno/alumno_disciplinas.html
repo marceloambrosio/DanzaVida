@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Disciplinas de {{ alumno.apellido }} {{ alumno.nombre }} {% if perms.AppDanzaVida.add_inscripcion %}<a href="{% url 'inscripcion_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva inscripción <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <br>
+    <table id="disciplinaAlumnoTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-2">Sucursal</th>
+                <th scope="col" class="col-4">Nombre</th>
+                <th scope="col" class="col-2">Tipo</th>
+                <th scope="col" class="col-2">Desde</th>
+                <th scope="col" class="col-2">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alumno_disciplina in object_list %}
+            <tr>
+                <td>{{ alumno_disciplina.disciplina.sucursal.nombre }}</td>
+                <td>{{ alumno_disciplina.disciplina.nombre }}</td>
+                <td>{{ alumno_disciplina.disciplina.tipo.nombre }}</td>
+                <td>{{ alumno_disciplina.fecha_inicio|date:"d/m/Y" }}</td>
+                <td>
+                  {% if not alumno_disciplina.fecha_baja %}
+                    <span class="badge bg-success rounded-pill">Activo</span>
+                  {% elif alumno_disciplina.fecha_baja == alumno_disciplina.disciplina.fecha_fin %}
+                    <span class="badge bg-warning rounded-pill">Finalizado</span>
+                  {% else %}
+                    <span class="badge bg-danger rounded-pill">Libre</span>
+                  {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#disciplinaAlumnoTable').DataTable({
+        "order": [[ 0, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}
