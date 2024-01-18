@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -199,8 +200,13 @@ class DisciplinaAlumnosListView(LoginRequiredMixin, PermissionRequiredMixin, Lis
     permission_required = 'AppDanzaVida.view_alumno'
 
     def get_queryset(self):
-        disciplina = get_object_or_404(Disciplina, id=self.kwargs['disciplina_id'])
-        return disciplina.inscripciones.all()
+        self.disciplina = get_object_or_404(Disciplina, id=self.kwargs['disciplina_id'])
+        return self.disciplina.inscripciones.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['disciplina'] = self.disciplina
+        return context
     
 class InscripcionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Inscripcion
@@ -221,6 +227,20 @@ class InscripcionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
     template_name = 'inscripcion/inscripcion_update.html'
     success_url = reverse_lazy('inscripcion_list')
     permission_required = 'AppDanzaVida.change_inscripcion'
+
+class InscripcionBajaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Inscripcion
+    fields = ['fecha_baja', 'activa']
+    template_name = 'inscripcion/inscripcion_baja.html'
+    permission_required = 'AppDanzaVida.change_inscripcion'
+
+    def form_valid(self, form):
+        form.instance.fecha_baja = timezone.now()
+        form.instance.activa = False
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('disciplina_alumnos', kwargs={'disciplina_id': self.object.disciplina.id})
 
 class InscripcionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Inscripcion

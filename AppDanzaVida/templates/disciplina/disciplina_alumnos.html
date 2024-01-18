@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Alumnos de {{ disciplina.nombre }} ({{ disciplina.sucursal.nombre }})</h2>
+    <br>
+    <table id="disciplinaAlumnosTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-4">Alumno</th>
+                <th scope="col" class="col-2">Teléfono</th>
+                <th scope="col" class="col-2">Edad</th>
+                <th scope="col" class="col-1">Estado</th>
+                <th scope="col" class="col-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for disciplina_alumnos in object_list %}
+            <tr>
+                <td>{{ disciplina_alumnos.alumno.apellido }} {{ disciplina_alumnos.alumno.nombre }}</td>
+                <td>{{ disciplina_alumnos.alumno.telefono }}</td>
+                <td>{{ disciplina_alumnos.alumno.fecha_nacimiento }}</td>
+                <td>
+                    {% if disciplina_alumnos.activa == True %}
+                      <span class="badge bg-success rounded-pill">Activa</span>
+                    {% elif disciplina_alumnos.activa == False %}
+                      <span class="badge bg-danger rounded-pill">Libre</span>
+                    {% endif %}
+                </td>
+                <td>
+                  {% if perms.AppDanzaVida.change_inscripcion and disciplina_alumnos.activa == True %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Dar de baja">
+                    <button type="button" class="btn" style="background-color: #FFBB64;" data-bs-toggle="modal" data-bs-target="#bajaModal{{ disciplina_alumnos.id }}"><i class="bi bi-file-earmark-excel"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.delete_inscripcion %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ disciplina_alumnos.id }}"><i class="bi bi-trash"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+            </tr>
+            <!-- Inicio Modal Baja -->
+            <div class="modal fade" id="bajaModal{{ disciplina_alumnos.id }}" tabindex="-1" aria-labelledby="bajaModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="bajaModalLabel">Confirmar baja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <p class="text-center">¿Estás seguro de que deseas dar de baja la inscripción de <b>{{ disciplina_alumnos.alumno.apellido }} {{ disciplina_alumnos.alumno.nombre }}</b> para la disciplina <b>{{ disciplina_alumnos.disciplina.nombre }} ({{ disciplina_alumnos.disciplina.sucursal.nombre }})</b>?</p>
+                    <div class="mb-3">
+                        <label for="fecha_baja" class="form-label">Fecha de baja:</label>
+                        <input type="date" class="form-control" id="fecha_baja" name="fecha_baja" value="{{ now|date:'Y-m-d' }}">
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{% url 'inscripcion_baja' disciplina_alumnos.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="Dar de baja" class="btn btn-danger">
+                    </form>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <!-- Fin Modal Baja -->
+            <!-- Inicio Modal Eliminar -->
+            <div class="modal fade" id="deleteModal{{ disciplina_alumnos.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="text-center">¿Estás seguro de que deseas eliminar la inscripción de <b>{{ disciplina_alumnos.alumno.apellido }} {{ disciplina_alumnos.alumno.nombre }}</b> para la disciplina <b>{{ disciplina_alumnos.disciplina.nombre }} ({{ disciplina_alumnos.disciplina.sucursal.nombre }})</b>?</p>
+                      <p class="text-danger text-center"><b>¡Una vez eliminado no podrás recuperarlo!</b></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <a href="{% url 'inscripcion_delete' disciplina_alumnos.id %}" class="btn btn-danger">Eliminar</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Eliminar -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#disciplinaAlumnosTable').DataTable({
+        "order": [[ 0, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Disciplinas de {{ alumno.apellido }} {{ alumno.nombre }} {% if perms.AppDanzaVida.add_inscripcion %}<a href="{% url 'inscripcion_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva inscripción <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <h2>Disciplinas de {{ alumno.apellido }} {{ alumno.nombre }}</h2>
     <br>
     <table id="disciplinaAlumnoTable" class="table table-hover">
         <thead>

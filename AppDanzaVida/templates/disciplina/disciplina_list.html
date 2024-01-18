@@ -13,8 +13,8 @@
                 <th scope="col" class="col-3">Nombre</th>
                 <th scope="col" class="col-2">Tipo</th>
                 <th scope="col" class="col-1">Horario</th>
-                <th scope="col" class="col-1">Activo</th>
-                <th scope="col" class="col-3">Acciones</th>
+                <th scope="col" class="col-2">Activo</th>
+                <th scope="col" class="col-2">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -71,6 +71,11 @@
                   {% if perms.AppDanzaVida.change_disciplina %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
                     <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'disciplina_update' disciplina.id %}'"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.view_alumno %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Alumnos">
+                    <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'disciplina_alumnos' disciplina.id %}'"><i class="bi bi-list-task"></i></button>
                   </span>
                   {% endif %}
                   {% if perms.AppDanzaVida.delete_disciplina %}
