@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
+from django.db.models import Sum
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm
@@ -262,6 +263,13 @@ class CuotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name = "cuota/cuota_list.html"
     context_object_name = 'cuotas'
     permission_required = 'AppDanzaVida.view_cuota'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        detalles = DetalleCuota.objects.all()
+        context['total_generado'] = detalles.aggregate(Sum('monto'))['monto__sum'] or 0
+        context['total_pagado'] = detalles.filter(pagada=True).aggregate(Sum('monto'))['monto__sum'] or 0
+        return context
 
 class CuotaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Cuota

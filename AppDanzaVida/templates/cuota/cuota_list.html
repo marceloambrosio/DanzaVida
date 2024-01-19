@@ -28,8 +28,8 @@
                 {% else %}
                   <td><span class="badge bg-danger">{{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span></td>
                 {% endif %}
-                <td>TOTAL</td>
-                <td>COBRADO</td>
+                <td> ${{ total_generado }}</td>
+                <td> ${{ total_pagado }}</td>
                 <td>
                   {% if perms.AppDanzaVida.view_cuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Detalle">
