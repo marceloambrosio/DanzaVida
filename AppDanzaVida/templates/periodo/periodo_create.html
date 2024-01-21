@@ -1,24 +1,22 @@
 {% extends 'base.html' %}
 
-{% load static %}
-
 {% block content %}
 <br>
 <div class="card" style="width: 100%;">
     <div class="card-body">
-        <h4 class="card-title">Nueva cuota</h4>
+        <h4 class="card-title">Nuevo periodo</h4>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
                 <br>
                 <div class="row">
-                    <div class="col-8">
-                        <h6>Periodo (*)</h6>
-                        {{ form.periodo }}
+                    <div class="col-6">
+                        <h6>Nombre (*)</h6>
+                        {{ form.mes }}
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <h6>Fecha de vencimiento (*)</h6>
-                        {{ form.fecha_vencimiento }}
+                        {{ form.anio }}
                     </div>
                 </div>
                 <br>
@@ -27,13 +25,5 @@
         </form>
     </div>
 </div>
-
-<link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
-  <script src="{% static 'js/select2.min.js' %}"></script>
-<script>
-    $(document).ready(function() {
-        $('#id_periodo').select2();
-    });
-</script>
     
 {% endblock %}

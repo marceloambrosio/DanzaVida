@@ -5,51 +5,31 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas {% if perms.AppDanzaVida.add_cuota %}<a href="{% url 'cuota_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva cuota <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <h2>Periodo {% if perms.AppDanzaVida.add_periodo %}<a href="{% url 'periodo_create' %}" class="btn float-end" style="background-color: #FF9843;">Nuevo periodo <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
     <br>
-    <table id="cuotaTable" class="table table-hover">
+    <table id="periodoTable" class="table table-hover">
         <thead>
             <tr>
-                <th scope="col" class="col-4">Periodo</th>
-                <th scope="col" class="col-2">Vencimiento</th>
-                <th scope="col" class="col-2">Total</th>
-                <th scope="col" class="col-2">Cobrado</th>
+                <th scope="col" class="col-4">Año</th>
+                <th scope="col" class="col-6">Mes</th>
                 <th scope="col" class="col-2">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for cuota in object_list %}
+            {% for periodo in object_list %}
             <tr>
-                <td>{{ cuota.periodo }}</td>
-                {% load tz %}
-                {% now "Y-m-d" as today %}
-                {% if cuota.fecha_vencimiento|date:"Y-m-d" > today %}
-                  <td><span class="badge bg-success">{{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span></td>
-                {% else %}
-                  <td><span class="badge bg-danger">{{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span></td>
-                {% endif %}
-                <td> ${{ total_generado }}</td>
-                <td> ${{ total_pagado }}</td>
+                <td>{{ periodo.anio }}</td>
+                <td>{{ periodo.get_mes_display }}</td>
                 <td>
-                  {% if perms.AppDanzaVida.view_cuota %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Detalle">
-                    <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'detalle_cuota_list' cuota.id %}'"><i class="bi bi-list-task"></i></button>
-                  </span>
-                  {% endif %}
-                  {% if perms.AppDanzaVida.change_cuota %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
-                    <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'cuota_update' cuota.id %}'"><i class="bi bi-pencil"></i></button>
-                  </span>
-                  {% endif %}
-                  {% if perms.AppDanzaVida.delete_cuota %}
+                  {% if perms.AppDanzaVida.delete_periodo %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
-                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ cuota.id }}"><i class="bi bi-trash"></i></button>
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ periodo.id }}"><i class="bi bi-trash"></i></button>
                   </span>
                   {% endif %}
                 </td>
               </tr>
               <!-- Inicio Modal Eliminar -->
-              <div class="modal fade" id="deleteModal{{ cuota.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+              <div class="modal fade" id="deleteModal{{ periodo.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -57,12 +37,12 @@
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                      <p class="text-center">¿Estás seguro de que deseas eliminar la cuota <b>{{ cuota.nombre }}</b> junto con todos los detalles generados?</p>
+                      <p class="text-center">¿Estás seguro de que deseas eliminar el periodo <b>{{ periodo.nombre }}</b> junto con todos los detalles generados?</p>
                       <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <a href="{% url 'cuota_delete' cuota.id %}" class="btn btn-danger">Eliminar</a>
+                      <a href="{% url 'periodo_delete' periodo.id %}" class="btn btn-danger">Eliminar</a>
                     </div>
                   </div>
                 </div>
@@ -85,7 +65,7 @@
 <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 <script>
 $(document).ready(function() {
-    var table = $('#cuotaTable').DataTable({
+    var table = $('#periodoTable').DataTable({
         "order": [[ 0, "desc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",

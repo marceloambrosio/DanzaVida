@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from datetime import datetime, date
-import math
+import math, calendar
 
 # Create your models here.
 
@@ -116,9 +116,94 @@ class Inscripcion(models.Model):
 
     def __str__(self):
         return self.disciplina.nombre + " - " + str(self.fecha) + " - " + self.alumno.apellido + " " + self.alumno.nombre
+    
+class Periodo(models.Model):
+    MESES = [
+        ('1', 'Enero'),
+        ('2', 'Febrero'),
+        ('3', 'Marzo'),
+        ('4', 'Abril'),
+        ('5', 'Mayo'),
+        ('6', 'Junio'),
+        ('7', 'Julio'),
+        ('8', 'Agosto'),
+        ('9', 'Septiembre'),
+        ('10', 'Octubre'),
+        ('11', 'Noviembre'),
+        ('12', 'Diciembre'),
+    ]
+    mes = models.CharField(max_length=20, choices=MESES)
+    anio = models.PositiveIntegerField(default=timezone.now().year)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Guarda el Periodo primero
+        DIAS = [
+            ('1', 'Lunes'),
+            ('2', 'Martes'),
+            ('3', 'Miercoles'),
+            ('4', 'Jueves'),
+            ('5', 'Viernes'),
+            ('6', 'Sabado'),
+            ('7', 'Domingo'),
+        ]
+        _, num_dias = calendar.monthrange(int(self.anio), int(self.mes))
+
+        # Para cada disciplina activa
+        for disciplina in Disciplina.objects.filter(activa=True):
+            # Crea una nueva Asistencia
+            asistencia = Asistencia.objects.create(periodo=self, disciplina=disciplina)
+
+            for dia in range(1, num_dias + 1):
+                dia_nombre = DIAS[calendar.weekday(int(self.anio), int(self.mes), dia)][1]
+
+                # Si la disciplina tiene un horario para este día
+                if disciplina.horario.filter(dia=str(calendar.weekday(int(self.anio), int(self.mes), dia) + 1)).exists():
+                    # Crea un nuevo DetallePeriodo para este día y esta disciplina
+                    detalle_periodo = DetallePeriodo.objects.create(
+                        periodo=self,
+                        dia_nombre=dia_nombre,
+                        dia_numero=dia,
+                    )
+
+                    # Para cada alumno inscripto en la disciplina y activo
+                    for inscripcion in Inscripcion.objects.filter(disciplina=disciplina, activa=True):
+                        # Crea un nuevo DetalleAsistencia
+                        DetalleAsistencia.objects.create(
+                            asistencia=asistencia,
+                            detalle_periodo=detalle_periodo,
+                            alumno=inscripcion.alumno,
+                        )
+
+    def __str__(self):
+        return str(self.anio) + " - " + self.get_mes_display()
+
+class DetallePeriodo(models.Model):
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, related_name='detalles')
+    dia_nombre = models.CharField(max_length=20)
+    dia_numero = models.PositiveIntegerField()
+    asistencia_tomada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.periodo.anio) + " - " + self.periodo.get_mes_display() + " - " + str(self.dia_numero) + " (" + self.dia_nombre + ")"
+
+class Asistencia(models.Model):
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, related_name='asistencias')
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='asistencias')
+
+    def __str__(self):
+        return self.periodo.__str__() + " - " + self.disciplina.__str__()
+    
+class DetalleAsistencia(models.Model):
+    asistencia = models.ForeignKey(Asistencia, on_delete=models.CASCADE, related_name='detalles')
+    detalle_periodo = models.ForeignKey(DetallePeriodo, on_delete=models.CASCADE, related_name='detalles_asistencia')
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='detalles_asistencia')
+    presente = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.detalle_periodo.__str__() + self.asistencia.disciplina.nombre +" - " + self.alumno.__str__() + " - " + str(self.presente)
 
 class Cuota(models.Model):
-    nombre = models.CharField(max_length=50)
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, related_name='cuotas')
     fecha_generacion = models.DateField(default=timezone.now)
     fecha_vencimiento = models.DateField()
 

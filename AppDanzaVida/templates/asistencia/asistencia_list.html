@@ -5,35 +5,29 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas de {{ alumno.apellido }} {{ alumno.nombre }}</h2>
+    <h2>Asistencias</h2>
     <br>
-    <table id="disciplinaAlumnoTable" class="table table-hover">
+    <table id="asistenciaTable" class="table table-hover">
         <thead>
             <tr>
-                <th scope="col" class="col-3">Cuota</th>
-                <th scope="col" class="col-5">Disciplina</th>
-                <th scope="col" class="col-2">Monto</th>
-                <th scope="col" class="col-2">Estado</th>
+                <th scope="col" class="col-4">Periodo</th>
+                <th scope="col" class="col-6">Disciplina</th>
+                <th scope="col" class="col-2">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for alumno_cuota in object_list %}
+            {% for asistencia in object_list %}
             <tr>
-                <td>{{ alumno_cuota.cuota.periodo }}</td>
-                <td>{{ alumno_cuota.disciplina.nombre }} ({{ alumno_cuota.disciplina.sucursal.nombre }})</td>
-                <td>${{ alumno_cuota.monto }} </td>
+                <td>{{ asistencia.periodo }}</td>
+                <td>{{ asistencia.disciplina }}</td>
                 <td>
-                  {% load tz %}
-                  {% now "Y-m-d" as today %}  
-                  {% if alumno_cuota.pagada == True %}
-                    <span class="badge bg-success rounded-pill">Pagada</span>
-                  {% elif alumno_cuota.pagada == False and alumno_cuota.cuota.fecha_vencimiento|date:"d/m/Y" < today %}
-                    <span class="badge bg-warning rounded-pill">Adeudada</span>
-                  {% else %}
-                    <span class="badge bg-danger rounded-pill">Vencida</span>
+                  {% if perms.AppDanzaVida.view_detalleasistencia %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Disciplinas">
+                    <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'detalle_asistencia_list' asistencia.id %}'"><i class="bi bi-list-task"></i></button>
+                  </span>
                   {% endif %}
                 </td>
-            </tr>
+              </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -51,8 +45,8 @@
 <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 <script>
 $(document).ready(function() {
-    var table = $('#disciplinaAlumnoTable').DataTable({
-        "order": [[ 0, "desc" ]],
+    var table = $('#asistenciaTable').DataTable({
+        "order": [[ 0, "asc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
             "sLengthMenu": "_MENU_",

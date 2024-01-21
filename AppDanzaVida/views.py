@@ -1,12 +1,15 @@
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.db.models import Sum
+from django.http import JsonResponse
+import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PeriodoForm
+from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia
 
 # Create your views here.
 
@@ -251,6 +254,88 @@ class InscripcionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
+class PeriodoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Periodo
+    form_class = PeriodoForm
+    template_name = 'periodo/periodo_create.html'
+    success_url = reverse_lazy('periodo_list')
+    permission_required = 'AppDanzaVida.add_periodo'
+
+class PeriodoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Periodo
+    template_name = "periodo/periodo_list.html"
+    context_object_name = 'periodos'
+    permission_required = 'AppDanzaVida.view_periodo'
+
+class PeriodoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Periodo
+    success_url = reverse_lazy('periodo_list')
+    permission_required = 'AppDanzaVida.delete_periodo'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+class AsistenciaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Asistencia
+    template_name = "asistencia/asistencia_list.html"
+    context_object_name = 'asistencias'
+    permission_required = 'AppDanzaVida.view_asistencia'
+
+class DetalleAsistenciaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = DetallePeriodo
+    template_name = 'asistencia/detalle_asistencia_list.html'
+    context_object_name = 'detalles'
+    permission_required = 'AppDanzaVida.view_detalleasistencia'
+
+    def get_queryset(self):
+        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
+        dias_disciplina = [int(dia) for dia in asistencia.disciplina.horario.values_list('dia', flat=True)]
+        
+        # Obtiene los DetallePeriodo que están directamente relacionados con la Asistencia especificada
+        detalles = DetallePeriodo.objects.filter(detalles_asistencia__asistencia=asistencia).order_by('dia_numero').distinct()
+
+        # Filtra los DetallePeriodo por los días de la semana en que la disciplina tiene un horario
+        detalles = [detalle for detalle in detalles if calendar.weekday(int(detalle.periodo.anio), int(detalle.periodo.mes), detalle.dia_numero) + 1 in dias_disciplina]
+
+        return detalles
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
+        context['asistencia'] = asistencia
+        return context
+    
+class AsistenciaAlumnoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = DetalleAsistencia
+    template_name = 'asistencia/asistencia_alumno_list.html'
+    context_object_name = 'alumnos'
+    permission_required = 'AppDanzaVida.view_asistenciaalumno'
+
+    def get_queryset(self):
+        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
+        detalle_periodo = DetallePeriodo.objects.get(id=self.kwargs['detalle_periodo_id'])
+        return DetalleAsistencia.objects.filter(asistencia=asistencia, detalle_periodo=detalle_periodo)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['asistencia'] = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
+        context['detalle_periodo'] = DetallePeriodo.objects.get(id=self.kwargs['detalle_periodo_id'])
+        return context
+
+@require_POST
+def actualizar_asistencia(request, detalle_asistencia_id):
+    detalle_asistencia = get_object_or_404(DetalleAsistencia, id=detalle_asistencia_id)
+    data = json.loads(request.body)
+    detalle_asistencia.presente = data.get('presente', False)
+    detalle_asistencia.save()
+
+    # Actualiza el atributo asistencia_tomada de DetallePeriodo
+    detalle_periodo = detalle_asistencia.detalle_periodo
+    detalle_periodo.asistencia_tomada = True
+    detalle_periodo.save()
+
+    return JsonResponse({'presente': detalle_asistencia.presente})
+
 class CuotaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Cuota
     form_class = CuotaForm

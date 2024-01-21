@@ -5,38 +5,28 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas de {{ alumno.apellido }} {{ alumno.nombre }}</h2>
+    <h2>Asistencia de {{ asistencia.disciplina.nombre }} - Fecha: {{ detalle_periodo.dia_numero }}/{{ asistencia.periodo.mes }}/{{ asistencia.periodo.anio }} <button type="button" class="btn float-end" style="background-color: #FF9843;" onclick="guardarCambios()">Guardar</button></h2>
     <br>
-    <table id="disciplinaAlumnoTable" class="table table-hover">
+    <table id="asistenciaAlumnoTable" class="table table-hover">
         <thead>
             <tr>
-                <th scope="col" class="col-3">Cuota</th>
-                <th scope="col" class="col-5">Disciplina</th>
-                <th scope="col" class="col-2">Monto</th>
-                <th scope="col" class="col-2">Estado</th>
+                <th scope="col" class="col-9">Alumno</th>
+                <th scope="col" class="col-3">Presente</th>
             </tr>
         </thead>
         <tbody>
-            {% for alumno_cuota in object_list %}
+            {% for alumno in alumnos %}
             <tr>
-                <td>{{ alumno_cuota.cuota.periodo }}</td>
-                <td>{{ alumno_cuota.disciplina.nombre }} ({{ alumno_cuota.disciplina.sucursal.nombre }})</td>
-                <td>${{ alumno_cuota.monto }} </td>
+                <td>{{ alumno.alumno.apellido }} {{ alumno.alumno.nombre }}</td>
                 <td>
-                  {% load tz %}
-                  {% now "Y-m-d" as today %}  
-                  {% if alumno_cuota.pagada == True %}
-                    <span class="badge bg-success rounded-pill">Pagada</span>
-                  {% elif alumno_cuota.pagada == False and alumno_cuota.cuota.fecha_vencimiento|date:"d/m/Y" < today %}
-                    <span class="badge bg-warning rounded-pill">Adeudada</span>
-                  {% else %}
-                    <span class="badge bg-danger rounded-pill">Vencida</span>
-                  {% endif %}
+                    <button class="btn {{ alumno.presente|yesno:'btn-success,btn-danger' }}" onclick="cambiarEstadoAsistencia({{ alumno.id }})">
+                        {{ alumno.presente|yesno:'Presente,Ausente' }}
+                    </button>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table>     
 </div>
 
 <script>
@@ -45,13 +35,59 @@
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
   });
+
+  var cambios = {};
+
+function cambiarEstadoAsistencia(detalleAsistenciaId) {
+    // Cambia el estado de asistencia en la interfaz de usuario
+    var boton = document.querySelector(`button[onclick="cambiarEstadoAsistencia(${detalleAsistenciaId})"]`);
+    if (boton.textContent === 'Presente') {
+        boton.textContent = 'Ausente';
+        boton.classList.replace('btn-success', 'btn-danger');
+    } else {
+        boton.textContent = 'Presente';
+        boton.classList.replace('btn-danger', 'btn-success');
+    }
+
+    // Guarda el cambio para enviarlo al servidor más tarde
+    cambios[detalleAsistenciaId] = !cambios[detalleAsistenciaId];
+}
+
+function guardarCambios() {
+    // Envía los cambios al servidor
+    var promises = [];
+    for (var detalleAsistenciaId in cambios) {
+        var promise = fetch(`/asistencia/${detalleAsistenciaId}/actualizar_asistencia/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({'presente': cambios[detalleAsistenciaId]})
+        });
+        promises.push(promise);
+    }
+    Promise.all(promises).then(function(responses) {
+        // Comprueba si todas las respuestas están bien
+        var allOk = responses.every(function(response) {
+            return response.ok;
+        });
+        if (allOk) {
+            alert('Cambios guardados con éxito');
+        } else {
+            alert('Ocurrió un error al guardar los cambios');
+        }
+    });
+}
+
+
 </script>
 
 <link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
 <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 <script>
 $(document).ready(function() {
-    var table = $('#disciplinaAlumnoTable').DataTable({
+    var table = $('#asistenciaAlumnoTable').DataTable({
         "order": [[ 0, "desc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
