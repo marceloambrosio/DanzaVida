@@ -53,6 +53,8 @@
                     </div>
                     <div class="modal-body">
                     <p class="text-center">¿Estás seguro de que deseas dar de baja la inscripción de <b>{{ disciplina_alumnos.alumno.apellido }} {{ disciplina_alumnos.alumno.nombre }}</b> para la disciplina <b>{{ disciplina_alumnos.disciplina.nombre }} ({{ disciplina_alumnos.disciplina.sucursal.nombre }})</b>?</p>
+                    <form action="{% url 'inscripcion_baja' disciplina_alumnos.id %}" method="post">
+                        {% csrf_token %}
                     <div class="mb-3">
                         <label for="fecha_baja" class="form-label">Fecha de baja:</label>
                         <input type="date" class="form-control" id="fecha_baja" name="fecha_baja" value="{{ now|date:'Y-m-d' }}">
@@ -60,8 +62,6 @@
                     </div>
                     <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form action="{% url 'inscripcion_baja' disciplina_alumnos.id %}" method="post">
-                        {% csrf_token %}
                         <input type="submit" value="Dar de baja" class="btn btn-danger">
                     </form>
                     </div>

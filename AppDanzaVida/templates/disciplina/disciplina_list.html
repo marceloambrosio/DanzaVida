@@ -13,8 +13,8 @@
                 <th scope="col" class="col-3">Nombre</th>
                 <th scope="col" class="col-2">Tipo</th>
                 <th scope="col" class="col-1">Horario</th>
-                <th scope="col" class="col-2">Activo</th>
-                <th scope="col" class="col-2">Acciones</th>
+                <th scope="col" class="col-1">Activo</th>
+                <th scope="col" class="col-3">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -78,6 +78,11 @@
                     <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'disciplina_alumnos' disciplina.id %}'"><i class="bi bi-list-task"></i></button>
                   </span>
                   {% endif %}
+                  {% if perms.AppDanzaVida.change_inscripcion and disciplina.activa == True %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Finalizar">
+                    <button type="button" class="btn" style="background-color: #6895D2;" data-bs-toggle="modal" data-bs-target="#bajaModal{{ disciplina.id }}"><i class="bi bi-file-earmark-excel"></i></button>
+                  </span>
+                  {% endif %}
                   {% if perms.AppDanzaVida.delete_disciplina %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
                     <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ disciplina.id }}"><i class="bi bi-trash"></i></button>
@@ -85,6 +90,32 @@
                   {% endif %}
                 </td>
             </tr>
+            <!-- Inicio Modal Baja -->
+            <div class="modal fade" id="bajaModal{{ disciplina.id }}" tabindex="-1" aria-labelledby="bajaModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                  <h5 class="modal-title" id="bajaModalLabel">Confirmar baja</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                  <p class="text-center">¿Estás seguro de que deseas finalizar la disciplina <b>{{ disciplina.nombre }} ({{ disciplina.sucursal.nombre }})</b> y todos los alumnos inscriptos?</p>
+                  <form action="{% url 'disciplina_baja' disciplina.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                          <label for="fecha_baja" class="form-label">Fecha de baja:</label>
+                          <input type="date" class="form-control" id="fecha_baja" name="fecha_baja" value="{{ now|date:'Y-m-d' }}">
+                      </div>
+                      <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <input type="submit" value="Dar de baja" class="btn btn-danger">
+                      </div>
+                  </form>
+                  </div>
+              </div>
+              </div>
+            </div>
+            <!-- Fin Modal Baja -->
             <!-- Inicio Modal Eliminar -->
             <div class="modal fade" id="deleteModal{{ disciplina.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
               <div class="modal-dialog">

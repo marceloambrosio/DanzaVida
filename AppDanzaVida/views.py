@@ -1,10 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.db.models import Sum
 from django.http import JsonResponse
+from datetime import datetime
 import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -176,6 +177,28 @@ class DisciplinaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
             horario.libre = True
             horario.save()
         return response
+    
+class DisciplinaBajaView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = 'AppDanzaVida.change_disciplina'
+
+    def post(self, request, *args, **kwargs):
+        disciplina = get_object_or_404(Disciplina, pk=kwargs['pk'])
+        fecha_baja_str = request.POST.get('fecha_baja')
+        fecha_baja = datetime.strptime(fecha_baja_str, '%Y-%m-%d').date() if fecha_baja_str else timezone.now()
+        disciplina.fecha_fin = fecha_baja
+        disciplina.activa = False
+        disciplina.save()
+
+        Inscripcion.objects.filter(disciplina=disciplina, activa=True).update(activa=False, fecha_baja=fecha_baja)
+
+        return redirect('disciplina_list')
+    
+    def form_valid(self, form):
+        form.instance.fecha_baja = timezone.now()
+        form.instance.activa = False
+        if form.is_valid():
+            form.save()
+        return super().form_valid(form)
 
 class DisciplinaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Disciplina
@@ -235,11 +258,12 @@ class InscripcionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
 class InscripcionBajaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Inscripcion
     fields = ['fecha_baja', 'activa']
-    template_name = 'inscripcion/inscripcion_baja.html'
     permission_required = 'AppDanzaVida.change_inscripcion'
 
     def form_valid(self, form):
-        form.instance.fecha_baja = timezone.now()
+        fecha_baja_str = self.request.POST.get('fecha_baja')
+        fecha_baja = datetime.strptime(fecha_baja_str, '%Y-%m-%d').date() if fecha_baja_str else timezone.now()
+        form.instance.fecha_baja = fecha_baja
         form.instance.activa = False
         return super().form_valid(form)
 
