@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Disciplinas {% if perms.AppDanzaVida.add_disciplina %}<a href="{% url 'disciplina_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva Disciplina <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <h2>Disciplinas {% if perms.AppDanzaVida.add_disciplina %}<a href="{% url 'disciplina_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva Disciplina <i class="bi bi-file-earmark-plus"></i></a>{% endif %}{% if perms.AppDanzaVida.view_tipo_disciplina %}<a href="{% url 'tipo_disciplina_list' %}" class="btn float-end" style="background-color: #9DBC98;">Tipos <i class="bi bi-list-ul"></i></a>{% endif %}{% if perms.AppDanzaVida.view_horario_disciplina %}<a href="{% url 'horario_disciplina_list' %}" class="btn float-end" style="background-color: #86A7FC;">Horarios <i class="bi bi-clock"></i></a>{% endif %}</h2>
     <br>
     <table id="disciplinaTable" class="table table-hover">
         <thead>

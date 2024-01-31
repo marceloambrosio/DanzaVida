@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas {% if perms.AppDanzaVida.add_cuota %}<a href="{% url 'cuota_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva cuota <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <h2>Cuotas {% if perms.AppDanzaVida.add_cuota %}<a href="{% url 'cuota_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva cuota <i class="bi bi-file-earmark-plus"></i></a>{% endif %}{% if perms.AppDanzaVida.view_periodo %}<a href="{% url 'periodo_list' %}" class="btn float-end" style="background-color: #9DBC98;">Periodos <i class="bi bi-list-ul"></i></a>{% endif %}</h2>
     <br>
     <table id="cuotaTable" class="table table-hover">
         <thead>

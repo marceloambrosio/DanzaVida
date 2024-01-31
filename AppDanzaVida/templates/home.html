@@ -3,28 +3,159 @@
 {% load static %}
 
 {% block content %}
-<br>
-<h5>Comercio</h5>
-<hr>
-<div class="row">
-    <div class="col-sm-4 mb-3 mb-sm-0">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Reempadronamiento Comercio Física</h5>
-          <p class="card-text">Completar el formulario para el reempadronamiento de comercio de personas físicas.</p>
-          <a href="{% url 'home' %}" class="btn float-end" style="background-color: #E36414;">Formulario</a>
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-4">
+      <a href="{% url 'alumno_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-alumno2.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Alumnos</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Listado de alumnos.</li>
+                    <li>Carga, edición y borrado.</li>
+                    <li>Cuotas por alumno.</li>
+                    <li>Disciplinas inscriptas.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
-    <div class="col-sm-4 mb-3 mb-sm-0">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Reempadronamiento Comercio Jurídica</h5>
-          <p class="card-text">Completar el formulario para el reempadronamiento de comercio de personas jurídica.</p>
-          <a href="{% url 'home' %}" class="btn float-end" style="background-color: #E36414;">Formulario</a>
+    <div class="col-lg-4">
+      <a href="{% url 'disciplina_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-disciplina.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Disciplinas</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Listado de disciplinas.</li>
+                    <li>Carga, edición y borrado.</li>
+                    <li>Alumnos por disciplina.</li>
+                    <li>Finalizar disciplina.</li>
+                    <li>Tipos y horarios.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </a>
+    </div>
+    <div class="col-lg-4">
+      <a href="{% url 'inscripcion_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-inscripcion.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Inscripciones</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Listado de inscripciones.</li>
+                    <li>Carga, edición y borrado.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
     </div>
   </div>
+  <div class="row">
+    <div class="col-lg-4">
+      <a href="{% url 'cuota_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-cuota.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Cuotas</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Listado de cuotas.</li>
+                    <li>Carga, edición y borrado.</li>
+                    <li>Cuota por alumno.</li>
+                    <li>Periodos.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-4">
+      <a href="{% url 'asistencia_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-asistencia2.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Asistencia</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Disciplinas por periodo.</li>
+                    <li>Asistencia por fecha.</li>
+                    <li>Toma de asistencia.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-4">
+      <a href="{% url 'inscripcion_list' %}" style="text-decoration: none; color: inherit;">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="{% static 'images/home/home-caja.png' %}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Caja</h5>
+                <p class="card-text"><small class="text-body-secondary">Opciones:</small></p>
+                <p class="card-text">
+                  <ul>
+                    <li>Movimientos de caja.</li>
+                    <li>Carga, edición y borrado.</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+
 
 {% endblock %}
