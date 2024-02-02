@@ -4,10 +4,11 @@
 
 {% block content %}
 <br>
+<div id="spinner"></div>
 <div class="card" style="width: 100%;">
     <div class="card-body">
         <h4 class="card-title">Nueva disciplina</h4>
-        <form method="POST" enctype="multipart/form-data">
+        <form id="disciplinaForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
                 <br>
@@ -60,6 +61,16 @@
 <link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
   <script src="{% static 'js/select2.min.js' %}"></script>
 <script>
+    $(document).ready(function () {
+        $('#disciplinaForm').on('submit', function() {
+            $('#spinner').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#spinner').hide();
+        });
+    });
+
     $(document).ready(function() {
         $('#id_tipo').select2();
     });

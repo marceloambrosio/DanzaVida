@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 <br>
+<div id="spinner"></div>
 <div class="card" style="width: 100%;">
     <div class="card-body">
         <h4 class="card-title">Nuevo periodo</h4>
-        <form method="POST" enctype="multipart/form-data">
+        <form id="periodoForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
                 <br>
@@ -25,5 +28,17 @@
         </form>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('#periodoForm').on('submit', function() {
+            $('#spinner').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#spinner').hide();
+        });
+    });
+</script>
     
 {% endblock %}

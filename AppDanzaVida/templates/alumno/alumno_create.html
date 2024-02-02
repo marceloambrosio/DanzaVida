@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 <br>
+<div id="spinner"></div>
 <div class="card" style="width: 100%;">
     <div class="card-body">
         <h4 class="card-title">Nuevo alumno</h4>
-        <form method="POST" enctype="multipart/form-data">
+        <form id="alumnoForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
                 <br>
@@ -163,6 +166,16 @@
 </div>
 
 <script>
+    $(document).ready(function () {
+        $('#alumnoForm').on('submit', function() {
+            $('#spinner').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#spinner').hide();
+        });
+    });
+
     /* Habilitar datos responsable 1 */
     document.addEventListener('DOMContentLoaded', (event) => {
     let cargarResponsable1 = document.querySelector('#responsable1'); 
