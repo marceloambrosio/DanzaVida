@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas de {{ cuota.nombre }}</h2>
+    <h2>Cuotas de {{ cuota.periodo.get_mes_display }} {{ cuota.periodo.anio }}</h2>
     <br>
     <table id="detalleCuotaTable" class="table table-hover">
         <thead>
@@ -21,7 +21,7 @@
             {% for detalle_cuota in object_list %}
             <tr>
                 <td>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }} {% if detalle_cuota.alumno.beca == True %}<span class="badge" style="background-color: #FFBB64;">Beca: {{ detalle_cuota.alumno.descuento }}%</span>{% endif %}</td>
-                <td>{{ detalle_cuota.disciplina.nombre }} ({{ detalle_cuota.disciplina.sucursal.nombre }})</td>
+                <td>{{ detalle_cuota.descripcion }}</td>
                 <td>${{ detalle_cuota.monto }}</td>
                 <td>
                   {% if detalle_cuota.pagada == True %}
@@ -52,7 +52,7 @@
                           </div>
                           <div class="modal-body">
                             <form method="post" action="{% url 'detalle_cuota_update' detalle_cuota.id %}">
-                              <p>Estás modificando la cuota de la disciplina <b>{{ detalle_cuota.disciplina.nombre }} ({{ detalle_cuota.disciplina.sucursal.nombre}})</b> del alumno/a <b>{{ detalle_cuota.alumno.nombre }} {{ detalle_cuota.alumno.nombre }}</b>.</p>
+                              <p>Estás modificando la cuota del alumno/a <b>{{ detalle_cuota.alumno.nombre }} {{ detalle_cuota.alumno.nombre }}</b>.</p>
                                 {% csrf_token %}
                                 <label for="monto">Monto:</label>
                                 <input type="number" id="monto" name="monto" value="{{ detalle_cuota.monto }}" class="form-control">
@@ -73,7 +73,7 @@
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                      <p class="text-center">¿Estás seguro de que deseas eliminar la cuota de <b>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</b> de la disciplina <b>{{ detalle_cuota.disciplina.nombre}} ({{ detalle_cuota.disciplina.sucursal.nombre}})</b>?</p>
+                      <p class="text-center">¿Estás seguro de que deseas eliminar la cuota de <b>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</b>?</p>
                       <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
                     </div>
                     <div class="modal-footer">

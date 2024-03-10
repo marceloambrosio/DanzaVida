@@ -25,7 +25,7 @@
                 <td>{{ disciplina.tipo.nombre }}</td>
                 <td>
                     {% if disciplina.horario.all %}
-                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#horarioModal{{ disciplina.id }}"><i class="bi bi-clock"></i></button>
+                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#horarioModal{{ disciplina.id }}"><i class="bi bi-clock"></i> ({{ disciplina.veces_por_semana }})</button>
                     
                     <!-- Modal con los horarios de la disciplina -->
                     <div class="modal fade" id="horarioModal{{ disciplina.id }}" tabindex="-1" aria-labelledby="horarioModalLabel" aria-hidden="true">

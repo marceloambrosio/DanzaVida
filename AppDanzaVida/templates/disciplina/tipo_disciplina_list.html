@@ -11,9 +11,8 @@
             <tr>
                 <th scope="col" class="col-2">Nombre</th>
                 <th scope="col" class="col-4">Descripción</th>
-                <th scope="col" class="col-2">Precio por hora</th>
-                <th scope="col" class="col-2">Activo</th>
-                <th scope="col" class="col-2">Acciones</th>
+                <th scope="col" class="col-3">Activo</th>
+                <th scope="col" class="col-3">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -21,7 +20,6 @@
             <tr>
                 <td>{{ tipo_disciplina.nombre }}</td>
                 <td>{{ tipo_disciplina.descripcion }}</td>
-                <td>${{ tipo_disciplina.precio_por_hora }}</td>
                 <td>
                   {% if tipo_disciplina.activa == True %}
                     <span class="badge bg-success rounded-pill">Activo</span>

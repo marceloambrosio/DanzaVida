@@ -42,11 +42,15 @@ class AlumnoForm(forms.ModelForm):
 class TipoDisciplinaForm(forms.ModelForm):
     class Meta:
         model = TipoDisciplina
-        fields = ['nombre', 'descripcion', 'precio_por_hora']
+        fields = ['nombre', 'descripcion', 'precio_clase', 'precio_semana_1', 'precio_semana_2', 'precio_semana_3', 'precio_libre']
         widgets = {
             'nombre': TextInput(attrs={'class': 'form-control'}),
             'descripcion': TextInput(attrs={'class': 'form-control'}),
-            'precio_por_hora': NumberInput(attrs={'class': 'form-control'}),
+            'precio_clase': NumberInput(attrs={'class': 'form-control'}),
+            'precio_semana_1': NumberInput(attrs={'class': 'form-control'}),
+            'precio_semana_2': NumberInput(attrs={'class': 'form-control'}),
+            'precio_semana_3': NumberInput(attrs={'class': 'form-control'}),
+            'precio_libre': NumberInput(attrs={'class': 'form-control'}),
         }
 
 class HorarioDisciplinaForm(forms.ModelForm):

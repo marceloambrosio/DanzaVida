@@ -86,7 +86,11 @@ class HorarioDisciplina(models.Model):
 class TipoDisciplina(models.Model):
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=100)
-    precio_por_hora = models.PositiveIntegerField()
+    precio_clase = models.PositiveIntegerField()
+    precio_semana_1 = models.PositiveIntegerField()
+    precio_semana_2 = models.PositiveIntegerField()
+    precio_semana_3 = models.PositiveIntegerField()
+    precio_libre = models.PositiveIntegerField()
     activa = models.BooleanField(default=True)
 
     def __str__(self):
@@ -102,6 +106,9 @@ class Disciplina(models.Model):
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     activa = models.BooleanField(default=True)
+
+    def veces_por_semana(self):
+        return self.horario.count()
 
     def __str__(self):
         return "[" + self.sucursal.nombre + "] " + self.nombre + " (" + self.tipo.nombre + ") - Inicio: " + str(self.fecha_inicio)
@@ -219,32 +226,51 @@ class Cuota(models.Model):
 
     def generar_detalles(self):
         inscripciones_activas = Inscripcion.objects.filter(activa=True)
+        alumnos = {}
         for inscripcion in inscripciones_activas:
-            monto = inscripcion.disciplina.tipo.precio_por_hora * inscripcion.disciplina.horas_semanales
-            if inscripcion.alumno.beca:
-                monto = monto * (100 - inscripcion.alumno.descuento) / 100
-            # Redondea el monto hacia arriba al múltiplo de 10 más cercano
-            monto = math.ceil(monto / Decimal(10.0)) * 10
-            DetalleCuota.objects.create(
-                cuota=self,
-                alumno=inscripcion.alumno,
-                disciplina=inscripcion.disciplina,
-                monto=monto,
-                pagada=False,
-            )
-    
+            alumno = inscripcion.alumno
+            tipo = inscripcion.disciplina.tipo
+            veces_por_semana = inscripcion.disciplina.veces_por_semana()
+            if alumno not in alumnos:
+                alumnos[alumno] = {'tipos': {tipo: veces_por_semana}, 'disciplinas': [inscripcion.disciplina]}
+            else:
+                if tipo not in alumnos[alumno]['tipos']:
+                    alumnos[alumno]['tipos'][tipo] = veces_por_semana
+                else:
+                    alumnos[alumno]['tipos'][tipo] += veces_por_semana
+                alumnos[alumno]['disciplinas'].append(inscripcion.disciplina)
+
+        for alumno, data in alumnos.items():
+            monto_total = 0
+            descripcion = ''
+            for tipo, veces_por_semana in data['tipos'].items():
+                if veces_por_semana == 1:
+                    monto = tipo.precio_semana_1
+                elif veces_por_semana == 2:
+                    monto = tipo.precio_semana_2
+                elif veces_por_semana == 3:
+                    monto = tipo.precio_semana_3
+                elif veces_por_semana > 3:
+                    monto = tipo.precio_libre
+                monto_total += monto
+                descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
+
+            detalle = DetalleCuota(cuota=self, alumno=alumno, monto=monto_total, descripcion=descripcion)
+            detalle.save()
+
+
     def __str__(self):
         return self.nombre + " - " + str(self.fecha_vencimiento)
 
 class DetalleCuota(models.Model):
     cuota = models.ForeignKey(Cuota, on_delete=models.CASCADE, related_name='detalles')
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
-    monto = models.DecimalField(max_digits=6, decimal_places=2)
+    monto = models.DecimalField(max_digits=8, decimal_places=2)
     pagada = models.BooleanField(default=False)
+    descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.cuota.nombre} - {self.alumno.nombre} {self.alumno.apellido} - {self.disciplina.nombre} - ${self.monto}'
+        return f'{self.cuota.nombre} - {self.alumno.nombre} {self.alumno.apellido} - {self.descripcion} - ${self.monto}'
 
 class Caja(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')

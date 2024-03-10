@@ -15,15 +15,32 @@
                         {{ form.nombre }}
                     </div>
                     <div class="col-6">
-                        <h6>Precio por hora (*)</h6>
-                        {{ form.precio_por_hora }}
+                        <h6>Descripción (*)</h6>
+                        {{ form.descripcion }}
                     </div>
                 </div>
                 <br>
                 <div class="row">
-                    <div class="col-12">
-                        <h6>Descripción (*)</h6>
-                        {{ form.descripcion }}
+                    <h5 class="text-center">Precios</h5>
+                    <div class="col-1">
+                        <h6>Clase (*)</h6>
+                        {{ form.precio_clase }}
+                    </div>
+                    <div class="col-3">
+                        <h6>1 por semana (*)</h6>
+                        {{ form.precio_semana_1 }}
+                    </div>
+                    <div class="col-3">
+                        <h6>2 por semana (*)</h6>
+                        {{ form.precio_semana_2 }}
+                    </div>
+                    <div class="col-3">
+                        <h6>3 por semana (*)</h6>
+                        {{ form.precio_semana_3 }}
+                    </div>
+                    <div class="col-2">
+                        <h6>Libre (*)</h6>
+                        {{ form.precio_libre }}
                     </div>
                 </div>
                 <br>

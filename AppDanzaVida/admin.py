@@ -60,8 +60,8 @@ class CuotaAdmin(admin.ModelAdmin):
 
 @admin.register(DetalleCuota)
 class DetalleCuotaAdmin(admin.ModelAdmin):
-    search_fields = ('cuota', 'alumno', 'disciplina', 'monto'),
-    ordering = ['cuota', 'alumno', 'disciplina']
+    search_fields = ('cuota', 'alumno', 'monto'),
+    ordering = ['cuota', 'alumno']
 
 @admin.register(Caja)
 class CajaAdmin(admin.ModelAdmin):
