@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5" style="overflow-x: auto;">
+    <h2>Asistencia para {{ disciplina.nombre }} <button id="saveButton" class="btn float-end" style="background-color: #FFBB64;">Guardar asistencia</button></h2>
+    <br>
+    <table id="asistenciaTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Alumno</th>
+                {% for fecha in fechas %}
+                <th scope="col">{{ fecha.dia_numero }}/{{ fecha.periodo.mes }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in filas %}
+            <tr>
+                <td>{{ fila.alumno.nombre }}</td>
+                {% for fecha in fechas %}
+                <td>
+                    <!-- Aquí puedes agregar tu checkbox para marcar la asistencia -->
+                    {% for detalle in fila.detalles %}
+                        {% if detalle.detalle_periodo.id == fecha.id %}
+                            {% if detalle.presente %}
+                            <input type="checkbox" id="asistencia_{{ fila.alumno.id }}_{{ fecha.id }}" checked>
+                            {% else %}
+                            <input type="checkbox" id="asistencia_{{ fila.alumno.id }}_{{ fecha.id }}">
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Cuando se hace clic en el botón Guardar
+    $('#saveButton').on('click', function() {
+        // Crea los datos a enviar al servidor
+        var data = {
+            'asistencias': [],
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        };
+
+        // Para cada checkbox de asistencia
+        $('input[type="checkbox"]').each(function() {
+            // Obtiene el ID del alumno y la fecha desde el ID del checkbox
+            var ids = this.id.split('_');
+            var alumno_id = ids[1];
+            var fecha_id = ids[2];
+
+            // Agrega la asistencia a los datos
+            data['asistencias'].push({
+                'alumno_id': alumno_id,
+                'fecha_id': fecha_id,
+                'presente': this.checked
+            });
+        });
+
+        // Hace una solicitud POST al servidor para actualizar las asistencias
+        $.ajax({
+            url: '/actualizar_asistencias/',
+            type: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+            },
+            success: function(response) {
+                alert("La asistencia se guardó correctamente.");
+                window.location.href = "{% url 'asistencia_list' %}";
+            }
+        });
+    });
+</script>
+{% endblock %}

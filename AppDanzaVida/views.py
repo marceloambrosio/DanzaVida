@@ -301,65 +301,48 @@ class PeriodoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
         return self.delete(request, *args, **kwargs)
 
 class AsistenciaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = Asistencia
+    model = Disciplina
     template_name = "asistencia/asistencia_list.html"
-    context_object_name = 'asistencias'
+    context_object_name = 'disciplinas'
     permission_required = 'AppDanzaVida.view_asistencia'
 
-class DetalleAsistenciaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = DetallePeriodo
-    template_name = 'asistencia/detalle_asistencia_list.html'
-    context_object_name = 'detalles'
-    permission_required = 'AppDanzaVida.view_detalleasistencia'
-
     def get_queryset(self):
-        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
-        dias_disciplina = [int(dia) for dia in asistencia.disciplina.horario.values_list('dia', flat=True)]
-        
-        # Obtiene los DetallePeriodo que están directamente relacionados con la Asistencia especificada
-        detalles = DetallePeriodo.objects.filter(detalles_asistencia__asistencia=asistencia).order_by('dia_numero').distinct()
-
-        # Filtra los DetallePeriodo por los días de la semana en que la disciplina tiene un horario
-        detalles = [detalle for detalle in detalles if calendar.weekday(int(detalle.periodo.anio), int(detalle.periodo.mes), detalle.dia_numero) + 1 in dias_disciplina]
-
-        return detalles
+        return Disciplina.objects.filter(activa=True)
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
-        context['asistencia'] = asistencia
-        return context
-    
-class AsistenciaAlumnoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = DetalleAsistencia
-    template_name = 'asistencia/asistencia_alumno_list.html'
+class AsistenciaDisciplinaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Alumno
+    template_name = 'asistencia/asistencia_disciplina_list.html'
     context_object_name = 'alumnos'
     permission_required = 'AppDanzaVida.view_asistenciaalumno'
 
     def get_queryset(self):
-        asistencia = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
-        detalle_periodo = DetallePeriodo.objects.get(id=self.kwargs['detalle_periodo_id'])
-        return DetalleAsistencia.objects.filter(asistencia=asistencia, detalle_periodo=detalle_periodo)
-    
+        disciplina = Disciplina.objects.get(id=self.kwargs['disciplina_id'])
+        return Alumno.objects.filter(inscripciones__disciplina=disciplina, inscripciones__activa=True)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['asistencia'] = Asistencia.objects.get(id=self.kwargs['asistencia_id'])
-        context['detalle_periodo'] = DetallePeriodo.objects.get(id=self.kwargs['detalle_periodo_id'])
+        disciplina = Disciplina.objects.get(id=self.kwargs['disciplina_id'])
+        context['disciplina'] = disciplina
+        detalles_asistencia = DetalleAsistencia.objects.filter(asistencia__disciplina=disciplina)
+        fechas = DetallePeriodo.objects.filter(id__in=detalles_asistencia.values_list('detalle_periodo', flat=True)).order_by('periodo__anio', 'periodo__mes', 'dia_numero')
+        context['fechas'] = fechas
+        filas = []
+        for alumno in context['alumnos']:
+            detalles = detalles_asistencia.filter(alumno=alumno)
+            filas.append({'alumno': alumno, 'detalles': detalles})
+        context['filas'] = filas
         return context
 
 @require_POST
-def actualizar_asistencia(request, detalle_asistencia_id):
-    detalle_asistencia = get_object_or_404(DetalleAsistencia, id=detalle_asistencia_id)
+def actualizar_asistencias(request):
     data = json.loads(request.body)
-    detalle_asistencia.presente = data.get('presente', False)
-    detalle_asistencia.save()
+    for asistencia_data in data['asistencias']:
+        detalle_asistencia = DetalleAsistencia.objects.get(alumno_id=asistencia_data['alumno_id'], detalle_periodo_id=asistencia_data['fecha_id'])
+        detalle_asistencia.presente = asistencia_data['presente']
+        detalle_asistencia.save()
 
-    # Actualiza el atributo asistencia_tomada de DetallePeriodo
-    detalle_periodo = detalle_asistencia.detalle_periodo
-    detalle_periodo.asistencia_tomada = True
-    detalle_periodo.save()
+    return JsonResponse({'status': 'success'})
 
-    return JsonResponse({'presente': detalle_asistencia.presente})
 
 class CuotaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Cuota

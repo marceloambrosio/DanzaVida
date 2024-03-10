@@ -4,34 +4,32 @@
 
 {% block content %}
 <div class="container mt-5">
-  
     <h2>Asistencias</h2>
     <br>
     <table id="asistenciaTable" class="table table-hover">
         <thead>
             <tr>
-                <th scope="col" class="col-4">Periodo</th>
-                <th scope="col" class="col-6">Disciplina</th>
-                <th scope="col" class="col-2">Acciones</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for asistencia in object_list %}
+            {% for disciplina in disciplinas %}
             <tr>
-                <td>{{ asistencia.periodo }}</td>
-                <td>{{ asistencia.disciplina }}</td>
+                <td>{{ disciplina.nombre }}</td>
                 <td>
                   {% if perms.AppDanzaVida.view_detalleasistencia %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Disciplinas">
-                    <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'detalle_asistencia_list' asistencia.id %}'"><i class="bi bi-list-task"></i></button>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Asistencias">
+                    <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'asistencia_disciplina_list' disciplina.id %}'"><i class="bi bi-list-task"></i></button>
                   </span>
                   {% endif %}
                 </td>
-              </tr>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
 
 <script>
   // Inicializar los tooltips
