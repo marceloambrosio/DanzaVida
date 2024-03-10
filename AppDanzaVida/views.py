@@ -76,6 +76,7 @@ class AlumnoCuotasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['alumno'] = self.alumno
+        context['detalle_cuota'] = self.alumno.detallecuota_set.first()
         return context
     
 class TipoDisciplinaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

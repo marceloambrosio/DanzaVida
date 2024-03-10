@@ -20,7 +20,7 @@
             {% for alumno_cuota in object_list %}
             <tr>
                 <td>{{ alumno_cuota.cuota.periodo }}</td>
-                <td>{{ alumno_cuota.disciplina.nombre }} ({{ alumno_cuota.disciplina.sucursal.nombre }})</td>
+                <td>{{ detalle_cuota.descripcion }}</td>
                 <td>${{ alumno_cuota.monto }} </td>
                 <td>
                   {% load tz %}

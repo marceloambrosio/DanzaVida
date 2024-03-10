@@ -44,6 +44,14 @@ class Alumno(models.Model):
     responsable3_telefono = models.CharField(max_length=20, blank=True, null=True)
     responsable3_email = models.EmailField(max_length=50, blank=True, null=True)
     
+    def calcular_edad(self):
+        hoy = timezone.now().date()
+        return hoy.year - self.fecha_nacimiento.year - ((hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day))
+
+    @property
+    def edad(self):
+        return self.calcular_edad()
+    
     def __str__(self):
         return self.apellido + " " + self.nombre + " - (DNI: " + self.dni + ")"
     

@@ -99,7 +99,7 @@
                     <span class="badge bg-danger rounded-pill">No presentada</span>
                   {% endif %}
                 </td>
-                <td>{{ alumno.fecha_nacimiento }}</td>
+                <td>{{ alumno.edad }} ({{ alumno.fecha_nacimiento|date:"d/m/Y" }})</td>
                 <td>
                   {% if perms.AppDanzaVida.change_alumno %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
