@@ -46,6 +46,7 @@ urlpatterns = [
     path('detalle_cuota_list/<int:pk>', login_required(DetalleCuotaListView.as_view()), name='detalle_cuota_list'),
     path('detalle_cuota_update/<int:pk>', login_required(DetalleCuotaUpdateView.as_view()), name='detalle_cuota_update'),
     path('detalle_cuota_delete/<int:pk>', login_required(DetalleCuotaDeleteView.as_view()), name='detalle_cuota_delete'),
+    path('pagar_cuota/<int:pk>/', PagarCuotaView.as_view(), name='pagar_cuota'),
     path('caja_create', login_required(CajaCreateView.as_view()), name='caja_create'),
     path('caja_list', login_required(CajaListView.as_view()), name='caja_list'),
     path('caja_update/<int:pk>', login_required(CajaUpdateView.as_view()), name='caja_update'),

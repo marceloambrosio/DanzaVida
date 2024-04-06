@@ -30,6 +30,11 @@
                   <span class="badge bg-danger">Adeuda</span>
                   {% endif %}</td>
                 <td>
+                  {% if detalle_cuota.pagada == False %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Pagar cuota">
+                    <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#pagoModal{{ detalle_cuota.id }}"><i class="bi bi-cash-coin"></i></button>
+                  </span>
+                  {% endif %}
                   {% if perms.AppDanzaVida.change_detallecuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuota">
                     <button type="button" class="btn" style="background-color: #9DBC98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-pencil"></i></button>
@@ -42,6 +47,35 @@
                   {% endif %}
                 </td>
               </tr>
+              <!-- Inicio Modal Pagar Cuota -->
+              <div class="modal fade" id="pagoModal{{ detalle_cuota.id }}" tabindex="-1" aria-labelledby="pagoModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="pagoModalLabel">Pagar cuota</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="post" action="{% url 'pagar_cuota' detalle_cuota.id %}">
+                        {% csrf_token %}
+                        <label for="sucursal">Sucursal:</label>
+                        <select id="sucursal" name="sucursal" class="form-control">
+                            {% for sucursal in sucursales %}
+                                <option value="{{ sucursal.id }}">{{ sucursal }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="metodo_pago">Método de pago:</label>
+                        <select id="metodo_pago" name="metodo_pago" class="form-control">
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Pagar</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Pagar Cuota -->
               <!-- Inicio Modal Editar -->
               <div class="modal fade" id="editModal{{ detalle_cuota.id }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

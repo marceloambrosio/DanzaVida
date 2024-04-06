@@ -9,8 +9,8 @@ from datetime import datetime
 import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PagoCuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm
+from .models import Sucursal, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
 
 # Create your views here.
 
@@ -391,6 +391,7 @@ class DetalleCuotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cuota'] = Cuota.objects.get(id=self.kwargs['pk'])
+        context['sucursales'] = Sucursal.objects.all()
         return context
 
 class DetalleCuotaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -411,6 +412,37 @@ class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+    
+class PagarCuotaView(View):
+    def post(self, request, *args, **kwargs):
+        detalle_cuota = get_object_or_404(DetalleCuota, id=self.kwargs['pk'])
+        metodo_pago = request.POST.get('metodo_pago')
+        sucursal_id = request.POST.get('sucursal')
+        sucursal = get_object_or_404(Sucursal, id=sucursal_id)
+
+        # Actualizar el valor pagada a True
+        detalle_cuota.pagada = True
+        detalle_cuota.save()
+
+        # Obtener o crear la Caja con fecha de hoy
+        caja, created = Caja.objects.get_or_create(
+            fecha=timezone.now().date(),
+            sucursal=sucursal
+        )
+
+        # Obtener o crear la CategoriaCaja 'Cuota'
+        categoria, created = CategoriaCaja.objects.get_or_create(nombre='Cuota')
+
+        # Crear un nuevo MovimientoCaja
+        MovimientoCaja.objects.create(
+            caja=caja,
+            descripcion=f'Cuota del mes {detalle_cuota.cuota.periodo.get_mes_display()} de {detalle_cuota.alumno.apellido} {detalle_cuota.alumno.nombre}',
+            monto=detalle_cuota.monto,
+            categoria=categoria,
+            metodo_pago=metodo_pago
+        )
+
+        return redirect(reverse('detalle_cuota_list', kwargs={'pk': detalle_cuota.cuota.id}))
     
 class CajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Caja
@@ -484,10 +516,6 @@ class MovimientoCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, Crea
             data.update({'caja': self.kwargs['caja_id']})
             kwargs['data'] = data
         return kwargs
-    
-    def form_invalid(self, form):
-        print(form.errors)
-        return super().form_invalid(form)
 
 class MovimientoCajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = MovimientoCaja
@@ -512,8 +540,11 @@ class MovimientoCajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Upda
 
 class MovimientoCajaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = MovimientoCaja
-    success_url = reverse_lazy('movimiento_caja_list')
     permission_required = 'AppDanzaVida.delete_movimientocaja'
+
+    def get_success_url(self):
+        movimiento_caja = get_object_or_404(MovimientoCaja, id=self.kwargs['pk'])
+        return reverse_lazy('movimiento_caja_list', kwargs={'caja_id': movimiento_caja.caja.id})
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

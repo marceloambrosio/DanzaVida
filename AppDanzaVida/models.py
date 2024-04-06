@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import datetime, date
 import calendar
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 # Create your models here.
@@ -267,9 +267,8 @@ class Cuota(models.Model):
             detalle = DetalleCuota(cuota=self, alumno=alumno, monto=monto_total, descripcion=descripcion)
             detalle.save()
 
-
     def __str__(self):
-        return self.nombre + " - " + str(self.fecha_vencimiento)
+        return str(self.periodo) + " - " + str(self.fecha_vencimiento)
 
 class DetalleCuota(models.Model):
     cuota = models.ForeignKey(Cuota, on_delete=models.CASCADE, related_name='detalles')
@@ -279,7 +278,7 @@ class DetalleCuota(models.Model):
     descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.cuota.nombre} - {self.alumno.nombre} {self.alumno.apellido} - {self.descripcion} - ${self.monto}'
+        return f'{self.cuota.periodo} - {self.alumno.nombre} {self.alumno.apellido} - {self.descripcion} - ${self.monto}'
 
 class Caja(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')
@@ -336,5 +335,10 @@ class MovimientoCaja(models.Model):
     
 @receiver(post_save, sender=MovimientoCaja)
 def actualizar_saldos(sender, instance, **kwargs):
+    instance.caja.calcular_saldo_efectivo()
+    instance.caja.calcular_saldo_transferencia()
+
+@receiver(post_delete, sender=MovimientoCaja)
+def actualizar_saldos_despues_de_borrar(sender, instance, **kwargs):
     instance.caja.calcular_saldo_efectivo()
     instance.caja.calcular_saldo_transferencia()

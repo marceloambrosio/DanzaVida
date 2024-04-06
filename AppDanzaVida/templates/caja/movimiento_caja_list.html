@@ -11,8 +11,8 @@
         <thead>
             <tr>
                 <th scope="col" class="col-1">Tipo</th>
-                <th scope="col" class="col-2">Categoria</th>
-                <th scope="col" class="col-2">Monto</th>
+                <th scope="col" class="col-1">Monto</th>
+                <th scope="col" class="col-3">Categoria</th>
                 <th scope="col" class="col-4">Descripción</th>
                 <th scope="col" class="col-3">Acciones</th>
             </tr>
@@ -21,8 +21,8 @@
             {% for movimientocaja in object_list %}
             <tr>
                 <td>{{ movimientocaja.categoria.tipo }}</td>
-                <td>{{ movimientocaja.categoria.nombre }}</td>
                 <td>${{ movimientocaja.monto }}</td>
+                <td>{{ movimientocaja.categoria.nombre }}</td>
                 <td>{{ movimientocaja.descripcion }}</td>
                 <td>
                   {% if perms.AppDanzaVida.change_movimientocaja %}

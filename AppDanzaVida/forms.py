@@ -152,3 +152,10 @@ class MovimientoCajaForm(forms.ModelForm):
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'metodo_pago': forms.Select(attrs={'class': 'form-control'}),
         }
+
+class PagoCuotaForm(forms.Form):
+    METODOS_PAGO = [
+        ('Efectivo', 'Efectivo'),
+        ('Transferencia', 'Transferencia'),
+    ]
+    metodo_pago = forms.ChoiceField(choices=METODOS_PAGO, widget=forms.Select(attrs={'class': 'form-control'}))
