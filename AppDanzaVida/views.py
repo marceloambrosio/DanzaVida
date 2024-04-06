@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views import View
 from django.db.models import Sum
@@ -9,8 +9,8 @@ from datetime import datetime
 import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PeriodoForm
-from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm
+from .models import Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
 
 # Create your views here.
 
@@ -408,6 +408,112 @@ class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
 
     def get_success_url(self):
         return reverse_lazy('detalle_cuota_list', kwargs={'cuota_id': self.object.cuota.id})
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class CajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Caja
+    form_class = CajaForm
+    template_name = 'caja/caja_create.html'
+    success_url = reverse_lazy('caja_list')
+    permission_required = 'AppDanzaVida.add_caja'
+
+class CajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Caja
+    template_name = "caja/caja_list.html"
+    context_object_name = 'cajas'
+    permission_required = 'AppDanzaVida.view_caja'
+
+class CajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Caja
+    form_class = CajaForm
+    template_name = 'caja/caja_create.html'
+    success_url = reverse_lazy('caja_list')
+    permission_required = 'AppDanzaVida.change_caja'
+
+class CajaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Caja
+    success_url = reverse_lazy('caja_list')
+    permission_required = 'AppDanzaVida.delete_caja'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class CategoriaCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = CategoriaCaja
+    form_class = CategoriaCajaForm
+    template_name = 'caja/categoria_caja_create.html'
+    success_url = reverse_lazy('categoria_caja_list')
+    permission_required = 'AppDanzaVida.add_categoriacaja'
+
+class CategoriaCajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = CategoriaCaja
+    template_name = "caja/categoria_caja_list.html"
+    context_object_name = 'categorias_caja'
+    permission_required = 'AppDanzaVida.view_categoriacaja'
+
+class CategoriaCajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = CategoriaCaja
+    form_class = CategoriaCajaForm
+    template_name = 'caja/categoria_caja_create.html'
+    success_url = reverse_lazy('categoria_caja_list')
+    permission_required = 'AppDanzaVida.change_categoriacaja'
+
+class CategoriaCajaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = CategoriaCaja
+    success_url = reverse_lazy('categoria_caja_list')
+    permission_required = 'AppDanzaVida.delete_categoriacaja'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+    
+class MovimientoCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = MovimientoCaja
+    form_class = MovimientoCajaForm
+    template_name = 'caja/movimiento_caja_create.html'
+    permission_required = 'AppDanzaVida.add_movimientocaja'
+
+    def get_success_url(self):
+        return reverse('movimiento_caja_list', args=[self.object.caja.id])
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.method in ('POST', 'PUT'):
+            data = kwargs['data'].copy()
+            data.update({'caja': self.kwargs['caja_id']})
+            kwargs['data'] = data
+        return kwargs
+    
+    def form_invalid(self, form):
+        print(form.errors)
+        return super().form_invalid(form)
+
+class MovimientoCajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = MovimientoCaja
+    template_name = "caja/movimiento_caja_list.html"
+    context_object_name = 'movimientos_caja'
+    permission_required = 'AppDanzaVida.view_movimientocaja'
+
+    def get_queryset(self):
+        return MovimientoCaja.objects.filter(caja_id=self.kwargs['caja_id'])
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['caja'] = Caja.objects.get(id=self.kwargs['caja_id'])
+        return context
+
+class MovimientoCajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = MovimientoCaja
+    form_class = MovimientoCajaForm
+    template_name = 'caja/movimiento_caja_update.html'
+    success_url = reverse_lazy('movimiento_caja_list')
+    permission_required = 'AppDanzaVida.change_movimientocaja'
+
+class MovimientoCajaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = MovimientoCaja
+    success_url = reverse_lazy('movimiento_caja_list')
+    permission_required = 'AppDanzaVida.delete_movimientocaja'
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

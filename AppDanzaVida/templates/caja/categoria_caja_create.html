@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<br>
+<div id="spinner"></div>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Nueva Categoría de Caja</h4>
+        <form id="categoriaCajaForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-2">
+                        <h6>Tipo (*)</h6>
+                        {{ form.tipo }}
+                    </div>
+                    <div class="col-4">
+                        <h6>Nombre (*)</h6>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Descripción (*)</h6>
+                        {{ form.descripcion }}
+                    </div>
+                </div>
+                <br>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#categoriaCajaForm').on('submit', function() {
+            $('#spinner').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#spinner').hide();
+        });
+    });
+</script>
+    
+{% endblock %}

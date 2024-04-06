@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Periodo, DetallePeriodo, Cuota, DetalleCuota, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, DetalleCaja
+from .models import Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Periodo, DetallePeriodo, Cuota, DetalleCuota, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
 
 # Register your models here.
 
@@ -73,7 +73,7 @@ class CategoriaCajaAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion', 'tipo'),
     ordering = ['nombre']
 
-@admin.register(DetalleCaja)
-class DetalleCajaAdmin(admin.ModelAdmin):
+@admin.register(MovimientoCaja)
+class MovimientoCajaAdmin(admin.ModelAdmin):
     search_fields = ('caja', 'categoria', 'monto'),
     ordering = ['caja', 'categoria']

@@ -2,7 +2,7 @@ from datetime import date
 from django import forms
 from django.db.models import Q
 from django.forms import CheckboxSelectMultiple, TextInput, NumberInput, EmailInput, DateInput, Select
-from .models import DetalleCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, Periodo
+from .models import MovimientoCaja, CategoriaCaja, Caja, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, Periodo
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -122,12 +122,33 @@ class CuotaForm(forms.ModelForm):
             'fecha_vencimiento': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
-class DetalleCajaForm(forms.ModelForm):
+class CajaForm(forms.ModelForm):
     class Meta:
-        model = DetalleCaja
-        fields = ['descripcion', 'monto', 'categoria']
+        model = Caja
+        fields = ['sucursal', 'fecha']
+        widgets = {
+            'sucursal': forms.Select(attrs={'class': 'form-control'}),
+            'fecha': forms.DateInput(attrs={'class': 'form-control'}),
+        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['caja'].queryset = Caja.objects.filter(fecha=date.today())
-        self.fields['caja'].initial = Caja.objects.get_or_create(fecha=date.today())[0]
+class CategoriaCajaForm(forms.ModelForm):
+    class Meta:
+        model = CategoriaCaja
+        fields = ['nombre', 'descripcion', 'tipo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+class MovimientoCajaForm(forms.ModelForm):
+    class Meta:
+        model = MovimientoCaja
+        fields = ['caja', 'descripcion', 'monto', 'categoria', 'metodo_pago']
+        widgets = {
+            'caja': forms.HiddenInput(),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'monto': forms.NumberInput(attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'metodo_pago': forms.Select(attrs={'class': 'form-control'}),
+        }

@@ -1,8 +1,9 @@
-from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from datetime import datetime, date
-import math, calendar
+import calendar
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -283,24 +284,26 @@ class DetalleCuota(models.Model):
 class Caja(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')
     fecha = models.DateField(default=timezone.now)
-    saldo = models.IntegerField(default=0)
     cerrada = models.BooleanField(default=False)
+    saldo_efectivo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    saldo_transferencia = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    def calcular_saldo(self):
-        saldo = 0
-        for detalle in self.detalle_caja.all():
-            if detalle.categoria.tipo == 'Ingreso' or detalle.categoria.tipo == 'Ajuste':
-                saldo += detalle.monto
-            else:  # Egreso o Gasto
-                saldo -= detalle.monto
-        self.saldo = saldo
+    def calcular_saldo_efectivo(self):
+        movimientos_efectivo = self.detalle_caja.filter(metodo_pago='Efectivo')
+        ingresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Ingreso')
+        egresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Egreso')
+        self.saldo_efectivo = ingresos - egresos
         self.save()
 
-    def save(self, *args, **kwargs):
-        if not self.id:  # solo cuando se crea una nueva caja
-            last_caja = Caja.objects.order_by('-fecha').first()
-            self.saldo = last_caja.saldo if last_caja else 0
-        super().save(*args, **kwargs)
+    def calcular_saldo_transferencia(self):
+        movimientos_transferencia = self.detalle_caja.filter(metodo_pago='Transferencia')
+        ingresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Ingreso')
+        egresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Egreso')
+        self.saldo_transferencia = ingresos - egresos
+        self.save()
+
+    def calcular_saldo_total(self):
+        return self.saldo_efectivo + self.saldo_transferencia
 
     def __str__(self):
         return str(self.fecha) + " - Cerrada: " + str(self.cerrada)
@@ -309,8 +312,6 @@ class CategoriaCaja(models.Model):
     TIPOS = [
         ('Ingreso', 'Ingreso'),
         ('Egreso', 'Egreso'),
-        ('Gasto', 'Gasto'),
-        ('Ajuste', 'Ajuste'),
     ]
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=100)
@@ -319,15 +320,21 @@ class CategoriaCaja(models.Model):
     def __str__(self):
         return self.tipo + " - " +self.nombre + " - " + self.descripcion
 
-class DetalleCaja(models.Model):
+class MovimientoCaja(models.Model):
+    METODOS_PAGO = [
+        ('Efectivo', 'Efectivo'),
+        ('Transferencia', 'Transferencia'),
+    ]
     caja = models.ForeignKey(Caja, on_delete=models.CASCADE, related_name='detalle_caja')
     descripcion = models.CharField(max_length=100)
-    monto = models.IntegerField()
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.ForeignKey(CategoriaCaja, on_delete=models.CASCADE, related_name='detalle_caja')
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.caja.calcular_saldo()
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO)
 
     def __str__(self):
         return str(self.monto) + " - " + self.categoria.nombre + " - " + self.descripcion 
+    
+@receiver(post_save, sender=MovimientoCaja)
+def actualizar_saldos(sender, instance, **kwargs):
+    instance.caja.calcular_saldo_efectivo()
+    instance.caja.calcular_saldo_transferencia()

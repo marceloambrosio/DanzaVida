@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  
+  <h2>Movimientos de Caja del {{ caja.fecha|date:"d/m/Y" }} {% if perms.AppDanzaVida.add_movimientocaja %}<a href="{% url 'movimiento_caja_create' caja.id %}" class="btn float-end" style="background-color: #FF9843;">Nuevo movimiento <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <br>
+    <table id="movimientoCajaTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-1">Tipo</th>
+                <th scope="col" class="col-2">Categoria</th>
+                <th scope="col" class="col-2">Monto</th>
+                <th scope="col" class="col-4">Descripción</th>
+                <th scope="col" class="col-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimientocaja in object_list %}
+            <tr>
+                <td>{{ movimientocaja.categoria.tipo }}</td>
+                <td>{{ movimientocaja.categoria.nombre }}</td>
+                <td>${{ movimientocaja.monto }}</td>
+                <td>{{ movimientocaja.descripcion }}</td>
+                <td>
+                  {% if perms.AppDanzaVida.change_movimientocaja %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                    <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'movimiento_caja_update' movimientocaja.id %}'"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
+                  {% if perms.AppDanzaVida.delete_movimientocaja %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                    <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ movimientocaja.id }}"><i class="bi bi-trash"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              <!-- Inicio Modal Eliminar -->
+              <div class="modal fade" id="deleteModal{{ movimientocaja.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="text-center">¿Estás seguro de que deseas eliminar el movimiento <b>[{{ movimientocaja.categoria.tipo }}] {{ movimientocaja.categoria.nombre }} - ${{ movimientocaja.monto }} - {{ movimientocaja.descripcion }}</b>?</p>
+                      <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <a href="{% url 'movimiento_caja_delete' movimientocaja.id %}" class="btn btn-danger">Eliminar</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Eliminar -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#movimientoCajaTable').DataTable({
+        "order": [[ 0, "asc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#decretoTable_length');
+});
+</script>
+{% endblock %}

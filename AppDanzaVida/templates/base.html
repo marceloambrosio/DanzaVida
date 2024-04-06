@@ -30,64 +30,74 @@
             <a class="nav-link" href="{% url 'home' %}">Inicio</a>
           </li>
           <li class="nav-item">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Alumnos
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'alumno_list' %}">Listado</a></li>
-            <hr>
-            <li><a class="dropdown-item" href="{% url 'alumno_create' %}">Nuevo</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Disciplinas
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'disciplina_list' %}">Listado</a></li>
-            <hr>
-            <li><a class="dropdown-item" href="{% url 'disciplina_create' %}">Nueva</a></li>
-            <hr>
-            <li><a class="dropdown-item" href="{% url 'tipo_disciplina_list' %}">Tipos</a></li>
-            <li><a class="dropdown-item" href="{% url 'horario_disciplina_list' %}">Horarios</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Inscripción
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'inscripcion_list' %}">Listado</a></li>
-            <hr>
-            <li><a class="dropdown-item" href="{% url 'inscripcion_create' %}">Nueva</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Cuota
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'cuota_list' %}">Listado</a></li>
-            <hr>
-            <li><a class="dropdown-item" href="{% url 'periodo_list' %}">Periodo</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Asistencia
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'asistencia_list' %}">Listado</a></li>
-          </ul>
-        </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Alumnos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'alumno_list' %}">Listado</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'alumno_create' %}">Nuevo</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Disciplinas
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'disciplina_list' %}">Listado</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'disciplina_create' %}">Nueva</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'tipo_disciplina_list' %}">Tipos</a></li>
+              <li><a class="dropdown-item" href="{% url 'horario_disciplina_list' %}">Horarios</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Inscripción
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'inscripcion_list' %}">Listado</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'inscripcion_create' %}">Nueva</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cuota
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'cuota_list' %}">Listado</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'periodo_list' %}">Periodo</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Asistencia
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'asistencia_list' %}">Listado</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Caja
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'caja_list' %}">Listado</a></li>
+              <hr>
+              <li><a class="dropdown-item" href="{% url 'categoria_caja_list' %}">Categorias</a></li>
+            </ul>
+          </li>
           </li>
         </ul>
       </div>
       {% if request.user.is_authenticated %}
-          <form class="d-flex">
-              <a class="btn btn-light" href="{% url 'logout' %}">Cerrar Sesión</a>
-          </form>
+      <form class="d-flex">
+        <a class="btn btn-light" href="{% url 'logout' %}">Cerrar Sesión</a>
+      </form>
       {% endif %}
     </div>
   </nav>
