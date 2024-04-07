@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DanzaVida_{{ detalle_cuota.cuota.periodo.anio }}_{{ detalle_cuota.cuota.periodo.get_mes_display }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        p {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Factura</h1>
+    <p>Alumno: {{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</p>
+    <p>Cuota: {{ detalle_cuota.cuota.periodo.get_mes_display }} {{ detalle_cuota.cuota.periodo.anio }}</p>
+    <p>Descripción: {{ detalle_cuota.descripcion }}</p>
+    <p>Monto: ${{ detalle_cuota.movimiento_caja.monto }}</p>
+    <p>Fecha de pago: {{ detalle_cuota.movimiento_caja.caja.fecha|date:"d/m/Y" }}</p>
+    <p>Método de pago: {{ detalle_cuota.movimiento_caja.get_metodo_pago_display }}</p>
+</body>
+</html>

@@ -35,6 +35,11 @@
                     <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#pagoModal{{ detalle_cuota.id }}"><i class="bi bi-cash-coin"></i></button>
                   </span>
                   {% endif %}
+                  {% if detalle_cuota.pagada == True %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Comprobante">
+                    <button type="button" class="btn" style="background-color: #6895D2;" onclick="window.open('{% url 'detalle_cuota_factura' detalle_cuota.id %}')"><i class="bi bi-printer"></i></button>
+                  </span>
+                  {% endif %}
                   {% if perms.AppDanzaVida.change_detallecuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuota">
                     <button type="button" class="btn" style="background-color: #9DBC98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-pencil"></i></button>
@@ -64,12 +69,14 @@
                                 <option value="{{ sucursal.id }}">{{ sucursal }}</option>
                             {% endfor %}
                         </select>
+                        <br>
                         <label for="metodo_pago">Método de pago:</label>
                         <select id="metodo_pago" name="metodo_pago" class="form-control">
                             <option value="Efectivo">Efectivo</option>
                             <option value="Transferencia">Transferencia</option>
                         </select>
-                        <button type="submit" class="btn btn-primary">Pagar</button>
+                        <br><hr>
+                        <button type="submit" class="btn float-end" style="background-color: #FF9843;" >Pagar</button>
                       </form>
                     </div>
                   </div>

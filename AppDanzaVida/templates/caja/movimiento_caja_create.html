@@ -39,6 +39,8 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
+  <script src="{% static 'js/select2.min.js' %}"></script>
 <script>
     $(document).ready(function () {
         $('#movimientoCajaForm').on('submit', function() {
@@ -48,6 +50,10 @@
         $(document).ajaxStop(function() {
             $('#spinner').hide();
         });
+    });
+
+    $(document).ready(function() {
+        $('#id_categoria').select2();
     });
 </script>
     

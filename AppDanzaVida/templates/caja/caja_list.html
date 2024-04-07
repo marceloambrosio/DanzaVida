@@ -25,6 +25,9 @@
                 <td>{% if caja.cerrada %}Sí{% else %}No{% endif %}</td>
                 <td><b>${{ caja.calcular_saldo_total }}</b> (Ef: ${{ caja.saldo_efectivo }} - Banco: ${{ caja.saldo_transferencia }})</td>
                 <td>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Imprimir">
+                    <button type="button" class="btn" style="background-color: #6895D2;" onclick="window.open('{% url 'caja_pdf' caja.id %}')"><i class="bi bi-printer"></i></button>
+                  </span>
                   {% if perms.AppDanzaVida.view_movimientocaja %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Movimientos de Caja">
                       <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'movimiento_caja_list' caja.id %}'"><i class="bi bi-list-task"></i></button>

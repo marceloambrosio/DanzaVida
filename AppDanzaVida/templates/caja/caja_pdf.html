@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caja de {{ caja.sucursal.nombre }} - {{ caja.fecha|date:"d/m/Y" }}</title>
+    <style>
+        /* Tus estilos aquí */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movimientos de Caja de {{ caja.sucursal.nombre }}</h1>
+    <h4>Fecha: {{ caja.fecha|date:"d/m/Y" }}</h4>
+    <p>Saldo Efectivo: ${{ caja.saldo_efectivo }}</p>
+    <p>Saldo Transferencia: ${{ caja.saldo_transferencia }}</p>
+    <p>Saldo Total: ${{ caja.saldo_total }}</p>
+    <h2>Movimientos:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Categoría</th>
+                <th>Método de Pago</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimiento in caja.detalle_caja.all %}
+                <tr>
+                    <td>{{ movimiento.descripcion }}</td>
+                    <td>${{ movimiento.monto }}</td>
+                    <td>{{ movimiento.categoria.nombre }}</td>
+                    <td>{{ movimiento.get_metodo_pago_display }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

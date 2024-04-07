@@ -6,6 +6,9 @@ from django.views import View
 from django.db.models import Sum
 from django.http import JsonResponse
 from datetime import datetime
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
 import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -422,7 +425,6 @@ class PagarCuotaView(View):
 
         # Actualizar el valor pagada a True
         detalle_cuota.pagada = True
-        detalle_cuota.save()
 
         # Obtener o crear la Caja con fecha de hoy
         caja, created = Caja.objects.get_or_create(
@@ -434,7 +436,7 @@ class PagarCuotaView(View):
         categoria, created = CategoriaCaja.objects.get_or_create(nombre='Cuota')
 
         # Crear un nuevo MovimientoCaja
-        MovimientoCaja.objects.create(
+        movimiento_caja = MovimientoCaja.objects.create(
             caja=caja,
             descripcion=f'Cuota del mes {detalle_cuota.cuota.periodo.get_mes_display()} de {detalle_cuota.alumno.apellido} {detalle_cuota.alumno.nombre}',
             monto=detalle_cuota.monto,
@@ -442,7 +444,28 @@ class PagarCuotaView(View):
             metodo_pago=metodo_pago
         )
 
+        # Asignar el MovimientoCaja al DetalleCuota
+        detalle_cuota.movimiento_caja = movimiento_caja
+        detalle_cuota.save()
+
         return redirect(reverse('detalle_cuota_list', kwargs={'pk': detalle_cuota.cuota.id}))
+    
+class DetalleCuotaFacturaPDFView(View):
+    def get(self, request, *args, **kwargs):
+        detalle_cuota = get_object_or_404(DetalleCuota, id=self.kwargs['pk'])
+
+        # Renderizar el template con el contexto
+        template = get_template('cuota/detalle_cuota_factura.html')
+        context = {'detalle_cuota': detalle_cuota}
+        html = template.render(context)
+
+        # Generar el PDF
+        pdf = HTML(string=html).write_pdf()
+
+        # Crear la respuesta
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename=DanzaVida_{detalle_cuota.cuota.periodo.anio}_{detalle_cuota.cuota.periodo.get_mes_display()}.pdf'
+        return response
     
 class CajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Caja
@@ -471,6 +494,23 @@ class CajaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+    
+class CajaPDFView(View):
+    def get(self, request, *args, **kwargs):
+        caja = get_object_or_404(Caja, id=self.kwargs['pk'])
+
+        # Renderizar el template con el contexto
+        template = get_template('caja/caja_pdf.html')
+        context = {'caja': caja}
+        html = template.render(context)
+
+        # Generar el PDF
+        pdf = HTML(string=html).write_pdf()
+
+        # Crear la respuesta
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename=Caja_{caja.sucursal.nombre}_{caja.fecha}.pdf'
+        return response
     
 class CategoriaCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = CategoriaCaja
