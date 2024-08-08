@@ -1,12 +1,29 @@
 from django.contrib import admin
-from .models import Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Periodo, DetallePeriodo, Cuota, DetalleCuota, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
+from .models import Localidad, Alumno, Sucursal, HorarioDisciplina, TipoDisciplina, Disciplina, Inscripcion, Periodo, DetallePeriodo, Cuota, DetalleCuota, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 
 # Register your models here.
 
+class LocalidadResource(resources.ModelResource):
+    class Meta:
+        model = Localidad
+        import_id_fields = []
+
+@admin.register(Localidad)
+class LocalidadAdmin(ImportExportModelAdmin):
+    resource_class = LocalidadResource
+    pass
+
+class AlumnoResource(resources.ModelResource):
+    class Meta:
+        model = Alumno
+        import_id_fields = []
+
 @admin.register(Alumno)
-class AlumnoAdmin(admin.ModelAdmin):
-    search_fields = ('apellido', 'nombre', 'dni'),
-    ordering = ['apellido', 'nombre']
+class AlumnoAdmin(ImportExportModelAdmin):
+    resource_class = AlumnoResource
+    pass
 
 @admin.register(Sucursal)
 class SucursalAdmin(admin.ModelAdmin):
@@ -23,10 +40,15 @@ class TipoDisciplinaAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion'),
     ordering = ['nombre']
 
+class DisciplinaResource(resources.ModelResource):
+    class Meta:
+        model = Disciplina
+        import_id_fields = []
+
 @admin.register(Disciplina)
-class DisciplinaAdmin(admin.ModelAdmin):
-    search_fields = ('nombre', 'descripcion'),
-    ordering = ['nombre']
+class DisciplinaAdmin(ImportExportModelAdmin):
+    resource_class = DisciplinaResource
+    pass
 
 @admin.register(Inscripcion)
 class InscripcionAdmin(admin.ModelAdmin):
@@ -77,3 +99,7 @@ class CategoriaCajaAdmin(admin.ModelAdmin):
 class MovimientoCajaAdmin(admin.ModelAdmin):
     search_fields = ('caja', 'categoria', 'monto'),
     ordering = ['caja', 'categoria']
+
+admin.register(Alumno, AlumnoAdmin)
+admin.register(Disciplina, DisciplinaAdmin)
+admin.register(Localidad, LocalidadAdmin)

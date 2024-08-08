@@ -25,7 +25,7 @@
                 <td>{{ alumno.telefono }}</td>
                 <td>
                   {% if alumno.responsable1_nombre %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable1_vinculo}}>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.get_responsable1_vinculo_display }}>
                     <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable1Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
                   </span>
                   <!-- Modal con los detalles del responsable1 -->
@@ -38,7 +38,7 @@
                           </div>
                           <div class="modal-body">
                             <p><b>Nombre:</b> {{ alumno.responsable1_nombre }} {{ alumno.responsable1_apellido }}</p>
-                            <p><b>Vínculo:</b> {{ alumno.responsable1_vinculo }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.get_responsable1_vinculo_display }}</p>
                             <p><b>Teléfono:</b> {{ alumno.responsable1_telefono }}</p>
                             <p><b>Email:</b> {{ alumno.responsable1_email }}</p>
                           </div>
@@ -47,7 +47,7 @@
                   </div>
                   {% endif %}
                   {% if alumno.responsable2_nombre %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable2_vinculo}}>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.get_responsable2_vinculo_display }}>
                     <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable2Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
                   </span>
                   <!-- Modal con los detalles del responsable2 -->
@@ -60,7 +60,7 @@
                           </div>
                           <div class="modal-body">
                             <p><b>Nombre:</b> {{ alumno.responsable2_nombre }} {{ alumno.responsable2_apellido }}</p>
-                            <p><b>Vínculo:</b> {{ alumno.responsable2_vinculo }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.get_responsable2_vinculo_display }}</p>
                             <p><b>Teléfono:</b> {{ alumno.responsable2_telefono }}</p>
                             <p><b>Email:</b> {{ alumno.responsable2_email }}</p>
                           </div>
@@ -69,7 +69,7 @@
                   </div>
                   {% endif %}
                   {% if alumno.responsable3_nombre %}
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.responsable3_vinculo}}>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title={{ alumno.get_responsable3_vinculo_display }}>
                     <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#responsable3Modal{{ alumno.id }}"><i class="bi bi-person"></i></button>
                   </span>
                   <!-- Modal con los detalles del responsable3 -->
@@ -82,7 +82,7 @@
                           </div>
                           <div class="modal-body">
                             <p><b>Nombre:</b> {{ alumno.responsable3_nombre }} {{ alumno.responsable3_apellido }}</p>
-                            <p><b>Vínculo:</b> {{ alumno.responsable3_vinculo }}</p>
+                            <p><b>Vínculo:</b> {{ alumno.get_responsable3_vinculo_display }}</p>
                             <p><b>Teléfono:</b> {{ alumno.responsable3_telefono }}</p>
                             <p><b>Email:</b> {{ alumno.responsable3_email }}</p>
                           </div>
@@ -161,7 +161,7 @@
 <script>
 $(document).ready(function() {
     var table = $('#alumnoTable').DataTable({
-        "order": [[ 0, "desc" ]],
+        "order": [[ 0, "asc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
             "sLengthMenu": "_MENU_",

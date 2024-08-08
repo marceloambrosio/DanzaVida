@@ -7,14 +7,22 @@ from django.dispatch import receiver
 
 # Create your models here.
 
+class Localidad(models.Model):
+    nombre = models.CharField(max_length=100)
+    codigo_postal = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.nombre + " - " + self.codigo_postal + " (ID: " + str(self.id) + ")"
+
 class Alumno(models.Model):
     VINCULO = [
-        ('Mamá', 'Mamá'),
-        ('Papá', 'Papá'),
-        ('Tutor', 'Tutor'),
-        ('Hermano', 'Hermano'),
-        ('Abuelo', 'Abuelo'),
-        ('Tio', 'Tio'),
+        ('mama', 'Mamá'),
+        ('papa', 'Papá'),
+        ('tutor', 'Tutor'),
+        ('hermano', 'Hermano'),
+        ('abuelo', 'Abuelo'),
+        ('tio', 'Tio'),
+        ('otro', 'Otro'),
     ]
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
@@ -22,7 +30,7 @@ class Alumno(models.Model):
     fecha_nacimiento = models.DateField()
     fecha_alta = models.DateField(default=timezone.now)
     domicilio = models.CharField(max_length=100)
-    localidad = models.CharField(max_length=100)
+    localidad = models.ForeignKey(Localidad, on_delete=models.CASCADE, related_name='alumnos')
     telefono = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(max_length=50, blank=True, null=True)
     observaciones = models.CharField(max_length=400, blank=True, null=True)
@@ -54,7 +62,7 @@ class Alumno(models.Model):
         return self.calcular_edad()
     
     def __str__(self):
-        return self.apellido + " " + self.nombre + " - (DNI: " + self.dni + ")"
+        return self.apellido + " " + self.nombre + " - (DNI: " + str(self.dni) + ")"
     
 class Sucursal(models.Model):
     nombre = models.CharField(max_length=50)
