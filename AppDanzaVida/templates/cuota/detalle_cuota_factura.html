@@ -1,7 +1,8 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DanzaVida_{{ detalle_cuota.cuota.periodo.anio }}_{{ detalle_cuota.cuota.periodo.get_mes_display }}</title>
+    <title>DanzaVida-{{ detalle_cuota.cuota.periodo.get_mes_display }}{{ detalle_cuota.cuota.periodo.anio }}_{{ detalle_cuota.alumno.apellido }}{{ detalle_cuota.alumno.nombre }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,12 +16,47 @@
     </style>
 </head>
 <body>
-    <h1>Factura</h1>
-    <p>Alumno: {{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</p>
-    <p>Cuota: {{ detalle_cuota.cuota.periodo.get_mes_display }} {{ detalle_cuota.cuota.periodo.anio }}</p>
-    <p>Descripción: {{ detalle_cuota.descripcion }}</p>
-    <p>Monto: ${{ detalle_cuota.movimiento_caja.monto }}</p>
-    <p>Fecha de pago: {{ detalle_cuota.movimiento_caja.caja.fecha|date:"d/m/Y" }}</p>
-    <p>Método de pago: {{ detalle_cuota.movimiento_caja.get_metodo_pago_display }}</p>
+    <table>
+        <tr>
+            <td><img src="{% static '/images/logo_recibo.png' %}" alt="DanzaVida" width="50" height="50"></td>
+            <td>
+                <h3>Danza Vida</h3>
+                <h4>Dirección General: Lic. Andrea Valfre</h4>
+                <h5>Mendoza 766 / H. Yrigoyen 329<br>Teléfono: (0353) 4535889<br>Whatsapp: 3534229629</h5>
+                <h4 style="text-align: right;">Fecha: {{ detalle_cuota.movimiento_caja.caja.fecha|date:"d/m/Y" }}</h4>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Cuota</th>
+                <th>Pago</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</td>
+                <td>{{ detalle_cuota.cuota.periodo.get_mes_display }} {{ detalle_cuota.cuota.periodo.anio }}</td>
+                <td>{{ detalle_cuota.movimiento_caja.get_metodo_pago_display }}</td>
+            </tr>
+        </tbody>
+    </table>    
+    <table>
+        <thead>
+            <tr>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ detalle_cuota.descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table>
+        <tr><h4 class="text-align: right">Total: ${{ detalle_cuota.movimiento_caja.monto }}</h4></tr>
+    </table>
 </body>
 </html>

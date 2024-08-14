@@ -460,7 +460,7 @@ class DetalleCuotaFacturaPDFView(View):
         html = template.render(context)
 
         # Generar el PDF
-        pdf = HTML(string=html).write_pdf()
+        pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf()
 
         # Crear la respuesta
         response = HttpResponse(pdf, content_type='application/pdf')

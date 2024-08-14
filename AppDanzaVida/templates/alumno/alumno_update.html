@@ -4,7 +4,11 @@
 <br>
 <div class="card" style="width: 100%;">
     <div class="card-body">
-        <h4 class="card-title">Editar alumno</h4>
+        <h4 class="card-title">
+            Editar alumno
+            <button type="button" class="btn" style="background-color: #FFEAA7;" onclick="window.location.href='{% url 'alumno_cuotas' alumno.id %}'">Cuotas del alumno <i class="bi bi-wallet2"></i></button>
+            <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'alumno_disciplinas' alumno.id %}'">Disciplinas del alumno <i class="bi bi-list-task"></i></button>
+        </h4>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">

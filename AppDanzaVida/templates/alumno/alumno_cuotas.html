@@ -5,7 +5,10 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Cuotas de {{ alumno.apellido }} {{ alumno.nombre }}</h2>
+    <h2>Cuotas de {{ alumno.apellido }} {{ alumno.nombre }} 
+        <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'alumno_update' alumno.id %}'">Editar alumno <i class="bi bi-pencil"></i></button>
+        <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'alumno_disciplinas' alumno.id %}'">Disciplinas del alumno<i class="bi bi-list-task"></i></button>
+    </h2>
     <br>
     <table id="disciplinaAlumnoTable" class="table table-hover">
         <thead>
