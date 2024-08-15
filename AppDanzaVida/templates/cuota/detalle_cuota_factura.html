@@ -7,46 +7,62 @@
         body {
             font-family: Arial, sans-serif;
         }
-        h1 {
-            text-align: center;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        p {
-            margin-left: 20px;
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #e2e2e2;
+        }
+        h3, h4, h5 {
+            margin: 0;
+        }
+        .text-right {
+            text-align: right;
         }
     </style>
 </head>
 <body>
     <table>
         <tr>
-            <td><img src="{% static '/images/logo_recibo.png' %}" alt="DanzaVida" width="50" height="50"></td>
+            <td style="text-align: center;"><img src="{% static '/images/logo_recibo.png' %}" alt="DanzaVida" width="50" height="50"></td>
             <td>
                 <h3>Danza Vida</h3>
-                <h4>Dirección General: Lic. Andrea Valfre</h4>
-                <h5>Mendoza 766 / H. Yrigoyen 329<br>Teléfono: (0353) 4535889<br>Whatsapp: 3534229629</h5>
-                <h4 style="text-align: right;">Fecha: {{ detalle_cuota.movimiento_caja.caja.fecha|date:"d/m/Y" }}</h4>
+                <br>
+                <span>Dirección General: Lic. Andrea Valfre <br>
+                Mendoza 766 / H. Yrigoyen 329 <br>
+                Teléfono: (0353) 4535889 <br>
+                Whatsapp: 3534229629</span>
+                <br><br>
+                <h5 class="text-right">Fecha: {{ detalle_cuota.movimiento_caja.caja.fecha|date:"d/m/Y" }}</h5>
             </td>
         </tr>
     </table>
     <table>
         <thead>
             <tr>
-                <th>Alumno</th>
-                <th>Cuota</th>
-                <th>Pago</th>
+                <th style="text-align: center;">Alumno</th>
+                <th style="text-align: center;">Cuota</th>
+                <th style="text-align: center;">Pago</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</td>
-                <td>{{ detalle_cuota.cuota.periodo.get_mes_display }} {{ detalle_cuota.cuota.periodo.anio }}</td>
-                <td>{{ detalle_cuota.movimiento_caja.get_metodo_pago_display }}</td>
+                <td style="text-align: center;">{{ detalle_cuota.alumno.apellido }} {{ detalle_cuota.alumno.nombre }}</td>
+                <td style="text-align: center;">{{ detalle_cuota.cuota.periodo.get_mes_display }} {{ detalle_cuota.cuota.periodo.anio }}</td>
+                <td style="text-align: center;">{{ detalle_cuota.movimiento_caja.get_metodo_pago_display }}</td>
             </tr>
         </tbody>
-    </table>    
+    </table>
     <table>
         <thead>
             <tr>
-                <th>Detalle</th>
+                <th>Disciplinas</th>
             </tr>
         </thead>
         <tbody>
@@ -56,7 +72,9 @@
         </tbody>
     </table>
     <table>
-        <tr><h4 class="text-align: right">Total: ${{ detalle_cuota.movimiento_caja.monto }}</h4></tr>
+        <tr>
+            <td class="text-right"><h4>Total: ${{ detalle_cuota.movimiento_caja.monto }}</h4></td>
+        </tr>
     </table>
 </body>
 </html>
