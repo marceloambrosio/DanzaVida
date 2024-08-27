@@ -30,6 +30,11 @@
                   <span class="badge bg-danger">Adeuda</span>
                   {% endif %}</td>
                 <td>
+                  {% if perms.AppDanzaVida.change_alumno %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Alumno">
+                    <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'alumno_update' detalle_cuota.alumno.id %}'"><i class="bi bi-pencil"></i></button>
+                  </span>
+                  {% endif %}
                   {% if detalle_cuota.pagada == False %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Pagar cuota">
                     <button type="button" class="btn" style="background-color: #FF9843;" data-bs-toggle="modal" data-bs-target="#pagoModal{{ detalle_cuota.id }}"><i class="bi bi-cash-coin"></i></button>
@@ -42,7 +47,7 @@
                   {% endif %}
                   {% if perms.AppDanzaVida.change_detallecuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuota">
-                    <button type="button" class="btn" style="background-color: #9DBC98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-pencil"></i></button>
+                    <button type="button" class="btn" style="background-color: #FFBE98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-tag"></i></button>
                   </span>
                   {% endif %}
                   {% if perms.AppDanzaVida.delete_detallecuota %}

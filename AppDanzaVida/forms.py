@@ -15,7 +15,7 @@ class AlumnoForm(forms.ModelForm):
             'fecha_nacimiento': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'fecha_alta': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'domicilio': TextInput(attrs={'class': 'form-control'}),
-            'localidad': TextInput(attrs={'class': 'form-control'}),
+            'localidad': Select(attrs={'class': 'form-control'}),
             'telefono': NumberInput(attrs={'class': 'form-control'}),
             'email': EmailInput(attrs={'class': 'form-control', 'oninput': 'this.value = this.value.toLowerCase()'}),
             'observaciones': TextInput(attrs={'class': 'form-control'}),
