@@ -416,6 +416,70 @@ class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
     
+def actualizar_cuotas(request, periodo_id):
+    periodo = get_object_or_404(Periodo, id=periodo_id)
+    cuotas = Cuota.objects.filter(periodo=periodo)
+
+    # Verificar y actualizar cuotas existentes
+    for cuota in cuotas:
+        inscripciones_activas = Inscripcion.objects.filter(activa=True)
+        alumnos = {}
+        for inscripcion in inscripciones_activas:
+            alumno = inscripcion.alumno
+            tipo = inscripcion.disciplina.tipo
+            veces_por_semana = inscripcion.disciplina.veces_por_semana()
+            if alumno not in alumnos:
+                alumnos[alumno] = {'tipos': {tipo: veces_por_semana}, 'disciplinas': [inscripcion.disciplina]}
+            else:
+                if tipo not in alumnos[alumno]['tipos']:
+                    alumnos[alumno]['tipos'][tipo] = veces_por_semana
+                else:
+                    alumnos[alumno]['tipos'][tipo] += veces_por_semana
+                alumnos[alumno]['disciplinas'].append(inscripcion.disciplina)
+
+        for alumno, data in alumnos.items():
+            monto_total = 0
+            descripcion = ''
+            for tipo, veces_por_semana in data['tipos'].items():
+                if veces_por_semana == 1:
+                    monto = tipo.precio_semana_1
+                elif veces_por_semana == 2:
+                    monto = tipo.precio_semana_2
+                elif veces_por_semana == 3:
+                    monto = tipo.precio_semana_3
+                elif veces_por_semana > 3:
+                    monto = tipo.precio_libre
+                monto_total += monto
+                descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
+
+            # Verificar si ya existe un DetalleCuota con el mismo alumno
+            detalle_existente = DetalleCuota.objects.filter(
+                cuota=cuota,
+                alumno=alumno
+            ).first()
+
+            if detalle_existente:
+                # Si existe, actualizar el monto y la descripción si son diferentes
+                if detalle_existente.monto != monto_total or detalle_existente.descripcion != descripcion:
+                    detalle_existente.monto = monto_total
+                    detalle_existente.descripcion = descripcion
+                    detalle_existente.save()
+            else:
+                # Si no existe, crear un nuevo DetalleCuota
+                detalle = DetalleCuota(cuota=cuota, alumno=alumno, monto=monto_total, descripcion=descripcion)
+                detalle.save()
+
+    # Generar cuotas para nuevos alumnos
+    inscripciones_activas = Inscripcion.objects.filter(activa=True)
+    alumnos_con_cuota = DetalleCuota.objects.filter(cuota__periodo=periodo).values_list('alumno', flat=True)
+    nuevos_alumnos = inscripciones_activas.exclude(alumno__in=alumnos_con_cuota)
+
+    for inscripcion in nuevos_alumnos:
+        cuota = Cuota.objects.create(periodo=periodo, fecha_vencimiento=timezone.now() + timezone.timedelta(days=30))
+        cuota.generar_detalles()
+
+    return redirect('cuota_list')
+    
 class PagarCuotaView(View):
     def post(self, request, *args, **kwargs):
         detalle_cuota = get_object_or_404(DetalleCuota, id=self.kwargs['pk'])

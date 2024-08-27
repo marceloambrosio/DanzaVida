@@ -48,6 +48,7 @@ urlpatterns = [
     path('detalle_cuota_delete/<int:pk>', login_required(DetalleCuotaDeleteView.as_view()), name='detalle_cuota_delete'),
     path('pagar_cuota/<int:pk>/', login_required(PagarCuotaView.as_view()), name='pagar_cuota'),
     path('detalle_cuota_factura/<int:pk>', login_required(DetalleCuotaFacturaPDFView.as_view()), name='detalle_cuota_factura'),
+    path('actualizar_cuotas/<int:periodo_id>/', login_required(actualizar_cuotas), name='actualizar_cuotas'),
     path('caja_create', login_required(CajaCreateView.as_view()), name='caja_create'),
     path('caja_list', login_required(CajaListView.as_view()), name='caja_list'),
     path('caja_update/<int:pk>', login_required(CajaUpdateView.as_view()), name='caja_update'),
