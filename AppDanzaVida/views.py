@@ -418,7 +418,9 @@ class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
     
 def actualizar_cuotas(request, periodo_id):
     periodo = get_object_or_404(Periodo, id=periodo_id)
-    cuotas = Cuota.objects.filter(periodo=periodo)
+    cuotas = Cuota.objects.filter(periodo=periodo, detalles__pagada=False).distinct()
+
+    cambios = []
 
     # Verificar y actualizar cuotas existentes
     for cuota in cuotas:
@@ -461,24 +463,116 @@ def actualizar_cuotas(request, periodo_id):
             if detalle_existente:
                 # Si existe, actualizar el monto y la descripción si son diferentes
                 if detalle_existente.monto != monto_total or detalle_existente.descripcion != descripcion:
-                    detalle_existente.monto = monto_total
-                    detalle_existente.descripcion = descripcion
-                    detalle_existente.save()
+                    cambios.append({
+                        'alumno': alumno,
+                        'cuota': cuota,
+                        'monto_anterior': detalle_existente.monto,
+                        'monto_nuevo': monto_total,
+                        'descripcion_anterior': detalle_existente.descripcion,
+                        'descripcion_nueva': descripcion
+                    })
             else:
                 # Si no existe, crear un nuevo DetalleCuota
-                detalle = DetalleCuota(cuota=cuota, alumno=alumno, monto=monto_total, descripcion=descripcion)
+                cambios.append({
+                    'alumno': alumno,
+                    'cuota': cuota,
+                    'monto_anterior': None,
+                    'monto_nuevo': monto_total,
+                    'descripcion_anterior': None,
+                    'descripcion_nueva': descripcion
+                })
+
+    if request.method == 'POST':
+        for cambio in cambios:
+            detalle_existente = DetalleCuota.objects.filter(
+                cuota=cambio['cuota'],
+                alumno=cambio['alumno']
+            ).first()
+
+            if detalle_existente:
+                detalle_existente.monto = cambio['monto_nuevo']
+                detalle_existente.descripcion = cambio['descripcion_nueva']
+                detalle_existente.save()
+            else:
+                detalle = DetalleCuota(
+                    cuota=cambio['cuota'],
+                    alumno=cambio['alumno'],
+                    monto=cambio['monto_nuevo'],
+                    descripcion=cambio['descripcion_nueva']
+                )
                 detalle.save()
 
-    # Generar cuotas para nuevos alumnos
-    inscripciones_activas = Inscripcion.objects.filter(activa=True)
-    alumnos_con_cuota = DetalleCuota.objects.filter(cuota__periodo=periodo).values_list('alumno', flat=True)
-    nuevos_alumnos = inscripciones_activas.exclude(alumno__in=alumnos_con_cuota)
+        return redirect('cuota_list')
 
-    for inscripcion in nuevos_alumnos:
-        cuota = Cuota.objects.create(periodo=periodo, fecha_vencimiento=timezone.now() + timezone.timedelta(days=30))
-        cuota.generar_detalles()
+    return redirect('actualizar_cuotas_mostrar', periodo_id=periodo.id)
 
-    return redirect('cuota_list')
+def actualizar_cuotas_mostrar(request, periodo_id):
+    periodo = get_object_or_404(Periodo, id=periodo_id)
+    cuotas = Cuota.objects.filter(periodo=periodo, detalles__pagada=False).distinct()
+
+    cambios = []
+
+    # Verificar y listar cambios en cuotas existentes
+    for cuota in cuotas:
+        inscripciones_activas = Inscripcion.objects.filter(activa=True)
+        alumnos = {}
+        for inscripcion in inscripciones_activas:
+            alumno = inscripcion.alumno
+            tipo = inscripcion.disciplina.tipo
+            veces_por_semana = inscripcion.disciplina.veces_por_semana()
+            if alumno not in alumnos:
+                alumnos[alumno] = {'tipos': {tipo: veces_por_semana}, 'disciplinas': [inscripcion.disciplina]}
+            else:
+                if tipo not in alumnos[alumno]['tipos']:
+                    alumnos[alumno]['tipos'][tipo] = veces_por_semana
+                else:
+                    alumnos[alumno]['tipos'][tipo] += veces_por_semana
+                alumnos[alumno]['disciplinas'].append(inscripcion.disciplina)
+
+        for alumno, data in alumnos.items():
+            monto_total = 0
+            descripcion = ''
+            for tipo, veces_por_semana in data['tipos'].items():
+                if veces_por_semana == 1:
+                    monto = tipo.precio_semana_1
+                elif veces_por_semana == 2:
+                    monto = tipo.precio_semana_2
+                elif veces_por_semana == 3:
+                    monto = tipo.precio_semana_3
+                elif veces_por_semana > 3:
+                    monto = tipo.precio_libre
+                monto_total += monto
+                descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
+
+            # Verificar si ya existe un DetalleCuota con el mismo alumno
+            detalle_existente = DetalleCuota.objects.filter(
+                cuota=cuota,
+                alumno=alumno
+            ).first()
+
+            if detalle_existente:
+                # Si existe, listar el cambio si el monto o la descripción son diferentes
+                if detalle_existente.monto != monto_total or detalle_existente.descripcion != descripcion:
+                    cambios.append({
+                        'alumno': alumno,
+                        'cuota': cuota,
+                        'monto_anterior': detalle_existente.monto,
+                        'monto_nuevo': monto_total,
+                        'descripcion_anterior': detalle_existente.descripcion,
+                        'descripcion_nueva': descripcion
+                    })
+            else:
+                # Si no existe, listar como nuevo DetalleCuota
+                cambios.append({
+                    'alumno': alumno,
+                    'cuota': cuota,
+                    'monto_anterior': None,
+                    'monto_nuevo': monto_total,
+                    'descripcion_anterior': None,
+                    'descripcion_nueva': descripcion
+                })
+
+    return render(request, 'cuota/cuotas_actualizar.html', {'cambios': cambios, 'periodo': periodo})
     
 class PagarCuotaView(View):
     def post(self, request, *args, **kwargs):

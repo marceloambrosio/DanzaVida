@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Actualizar cuotas {{ periodo.get_mes_display }} {{ periodo.anio }}</h2>
+    <br>
+    <form method="post" action="{% url 'actualizar_cuotas' periodo.id %}">
+        {% csrf_token %}
+        <table id="detalleCuotaTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-3">Alumno</th>
+                    <th scope="col" class="col-2">Monto Anterior</th>
+                    <th scope="col" class="col-2">Monto Nuevo</th>
+                    <th scope="col" class="col-2">Descripción Anterior</th>
+                    <th scope="col" class="col-3">Descripción Nueva</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cambio in cambios %}
+                <tr>
+                    <td>{{ cambio.alumno.apellido }} {{ cambio.alumno.nombre }} {% if cambio.alumno.beca %}<span class="badge" style="background-color: #FFBB64;">Beca: {{ cambio.alumno.descuento }}%</span>{% endif %}</td>
+                    <td>{% if cambio.monto_anterior %}${{ cambio.monto_anterior }}{% else %} - {% endif %}</td>
+                    <td>${{ cambio.monto_nuevo }}</td>
+                    <td>{% if cambio.descripcion_anterior %}{{ cambio.descripcion_anterior }}{% else %} - {% endif %}</td>
+                    <td>{{ cambio.descripcion_nueva }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success float-end">Confirmar Cambios</button>
+        <a href="{% url 'cuota_list' %}" class="btn btn-secondary float-end">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

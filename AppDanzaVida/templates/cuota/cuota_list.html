@@ -42,7 +42,7 @@
                   </span>
                   {% endif %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuotas">
-                    <button type="button" class="btn" style="background-color: #FFBE98;" data-bs-toggle="modal" data-bs-target="#updateCuotaModal{{ cuota.periodo.id }}"><i class="bi bi-arrow-clockwise"></i></button>
+                    <button type="button" class="btn" style="background-color: #FFBE98;" onclick="window.location.href='{% url 'actualizar_cuotas' cuota.periodo.id %}'"><i class="bi bi-arrow-clockwise"></i></button>
                   </span>
                   {% if perms.AppDanzaVida.delete_cuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
@@ -52,26 +52,6 @@
                   
                 </td>
               </tr>
-              <!-- Inicio Modal Update Cuota -->
-              <div class="modal fade" id="updateCuotaModal{{ cuota.id }}" tabindex="-1" aria-labelledby="updateCuotaModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="updateCuotaModalLabel">Confirmar eliminación</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <p class="text-center">¿Estás seguro de que deseas actualizar las cuotas del periodo <b>{{ cuota.periodo }}</b>?</p>
-                      <p class="text-danger text-center"><b>¡Una vez modificada no podrás revertirlo!</b></p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <a href="{% url 'actualizar_cuotas' cuota.periodo.id %}" class="btn btn-success">Actualizar</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Fin Modal Update Cuota -->
               <!-- Inicio Modal Eliminar -->
               <div class="modal fade" id="deleteModal{{ cuota.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
