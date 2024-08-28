@@ -44,6 +44,9 @@
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuotas">
                     <button type="button" class="btn" style="background-color: #FFBE98;" onclick="window.location.href='{% url 'actualizar_cuotas' cuota.periodo.id %}'"><i class="bi bi-arrow-clockwise"></i></button>
                   </span>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Vencimiento cuotas">
+                    <button type="button" class="btn" style="background-color: #CD5C08;" onclick="window.location.href='{% url 'actualizar_cuotas_vencimiento' cuota.periodo.id %}'"><i class="bi bi-receipt-cutoff"></i></button>
+                  </span>
                   {% if perms.AppDanzaVida.delete_cuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
                     <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ cuota.id }}"><i class="bi bi-trash"></i></button>

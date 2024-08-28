@@ -9,6 +9,7 @@ from datetime import datetime
 from django.template.loader import get_template
 from django.http import HttpResponse
 from weasyprint import HTML
+from decimal import Decimal
 import calendar, json
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -573,7 +574,57 @@ def actualizar_cuotas_mostrar(request, periodo_id):
                 })
 
     return render(request, 'cuota/cuotas_actualizar.html', {'cambios': cambios, 'periodo': periodo})
-    
+
+def actualizar_cuotas_vencimiento_mostrar(request, periodo_id):
+    periodo = get_object_or_404(Periodo, id=periodo_id)
+    cuotas_vencidas = Cuota.objects.filter(periodo=periodo, detalles__pagada=False, fecha_vencimiento__lt=timezone.now()).distinct()
+
+    cambios = []
+
+    for cuota in cuotas_vencidas:
+        for detalle in cuota.detalles.filter(pagada=False):
+            monto_nuevo = round(detalle.monto * Decimal('1.10') / Decimal('100')) * Decimal('100')
+            cambios.append({
+                'alumno': detalle.alumno,
+                'cuota': cuota,
+                'monto_anterior': detalle.monto,
+                'monto_nuevo': monto_nuevo,
+                'descripcion': detalle.descripcion
+            })
+
+    return render(request, 'cuota/cuota_vencimiento.html', {'cambios': cambios, 'periodo': periodo})
+
+def actualizar_cuotas_vencimiento(request, periodo_id):
+    periodo = get_object_or_404(Periodo, id=periodo_id)
+    cuotas_vencidas = Cuota.objects.filter(periodo=periodo, detalles__pagada=False, fecha_vencimiento__lt=timezone.now()).distinct()
+
+    cambios = []
+
+    for cuota in cuotas_vencidas:
+        for detalle in cuota.detalles.filter(pagada=False):
+            monto_nuevo = round(detalle.monto * Decimal('1.10') / Decimal('100')) * Decimal('100')
+            cambios.append({
+                'alumno': detalle.alumno,
+                'cuota': cuota,
+                'monto_anterior': detalle.monto,
+                'monto_nuevo': monto_nuevo,
+                'descripcion': detalle.descripcion
+            })
+
+    if request.method == 'POST':
+        for cambio in cambios:
+            detalle = DetalleCuota.objects.filter(
+                cuota=cambio['cuota'],
+                alumno=cambio['alumno']
+            ).first()
+            if detalle:
+                detalle.monto = cambio['monto_nuevo']
+                detalle.save()
+
+        return redirect('cuota_list')
+
+    return redirect('actualizar_cuotas_vencimiento_mostrar', periodo_id=periodo.id)
+
 class PagarCuotaView(View):
     def post(self, request, *args, **kwargs):
         detalle_cuota = get_object_or_404(DetalleCuota, id=self.kwargs['pk'])

@@ -45,12 +45,12 @@
                     <button type="button" class="btn" style="background-color: #6895D2;" onclick="window.open('{% url 'detalle_cuota_factura' detalle_cuota.id %}')"><i class="bi bi-printer"></i></button>
                   </span>
                   {% endif %}
-                  {% if perms.AppDanzaVida.change_detallecuota %}
+                  {% if perms.AppDanzaVida.change_detallecuota and detalle_cuota.pagada == False %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Actualizar cuota">
                     <button type="button" class="btn" style="background-color: #FFBE98;" data-bs-toggle="modal" data-bs-target="#editModal{{ detalle_cuota.id }}"><i class="bi bi-tag"></i></button>
                   </span>
                   {% endif %}
-                  {% if perms.AppDanzaVida.delete_detallecuota %}
+                  {% if perms.AppDanzaVida.delete_detallecuota and detalle_cuota.pagada == False %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
                     <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ detalle_cuota.id }}"><i class="bi bi-trash"></i></button>
                   </span>
