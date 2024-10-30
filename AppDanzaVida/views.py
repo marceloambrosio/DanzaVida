@@ -452,6 +452,10 @@ def actualizar_cuotas(request, periodo_id):
                     monto = tipo.precio_semana_3
                 elif veces_por_semana > 3:
                     monto = tipo.precio_libre
+
+                if alumno.beca and alumno.descuento:
+                    monto = monto * (1 - (alumno.descuento / 100.0))
+
                 monto_total += monto
                 descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
 
@@ -542,6 +546,10 @@ def actualizar_cuotas_mostrar(request, periodo_id):
                     monto = tipo.precio_semana_3
                 elif veces_por_semana > 3:
                     monto = tipo.precio_libre
+
+                if alumno.beca and alumno.descuento:
+                    monto = monto * (1 - (alumno.descuento / 100.0))
+                    
                 monto_total += monto
                 descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
 

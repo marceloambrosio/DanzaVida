@@ -5,6 +5,7 @@ import calendar
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
+
 # Create your models here.
 
 class Localidad(models.Model):
@@ -138,6 +139,60 @@ class Inscripcion(models.Model):
     fecha_baja = models.DateField(blank=True, null=True)
     activa = models.BooleanField(default=True)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs) 
+
+        if self.activa: 
+            fecha_actual = self.disciplina.fecha_inicio
+            while fecha_actual <= self.disciplina.fecha_fin:
+                mes = fecha_actual.month
+                anio = fecha_actual.year
+
+                periodo, _ = Periodo.objects.get_or_create( 
+                    mes=str(mes), anio=anio 
+                )
+
+                asistencia, _ = Asistencia.objects.get_or_create( 
+                    periodo=periodo, 
+                    disciplina=self.disciplina
+                )
+
+                DIAS = [
+                    ('1', 'Lunes'),
+                    ('2', 'Martes'),
+                    ('3', 'Miercoles'),
+                    ('4', 'Jueves'),
+                    ('5', 'Viernes'),
+                    ('6', 'Sabado'),
+                    ('7', 'Domingo'),
+                ]
+                _, num_dias = calendar.monthrange(periodo.anio, int(periodo.mes))
+
+                for dia in range(1, num_dias + 1): 
+                    dia_nombre = DIAS[calendar.weekday(anio, mes, dia)][1]
+
+                    if self.disciplina.horario.filter(dia=str(calendar.weekday(anio, mes, dia) + 1)).exists():
+                        detalle_periodo, _ = DetallePeriodo.objects.get_or_create(
+                            periodo=periodo,
+                            dia_nombre=dia_nombre,
+                            dia_numero=dia
+                        )
+
+                        if not DetalleAsistencia.objects.filter(asistencia=asistencia, detalle_periodo=detalle_periodo, alumno=self.alumno).exists():
+                            DetalleAsistencia.objects.create(
+                                asistencia=asistencia,
+                                detalle_periodo=detalle_periodo,
+                                alumno=self.alumno
+                            )
+                
+                # Avanzar al siguiente mes 
+                if mes == 12: 
+                    mes = 1 
+                    anio += 1 
+                else: 
+                    mes += 1 
+                fecha_actual = fecha_actual.replace(month=mes, year=anio)
+
     def __str__(self):
         return self.disciplina.nombre + " - " + str(self.fecha) + " - " + self.alumno.apellido + " " + self.alumno.nombre
     
@@ -158,45 +213,6 @@ class Periodo(models.Model):
     ]
     mes = models.CharField(max_length=20, choices=MESES)
     anio = models.PositiveIntegerField(default=timezone.now().year)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Guarda el Periodo primero
-        DIAS = [
-            ('1', 'Lunes'),
-            ('2', 'Martes'),
-            ('3', 'Miercoles'),
-            ('4', 'Jueves'),
-            ('5', 'Viernes'),
-            ('6', 'Sabado'),
-            ('7', 'Domingo'),
-        ]
-        _, num_dias = calendar.monthrange(int(self.anio), int(self.mes))
-
-        # Para cada disciplina activa
-        for disciplina in Disciplina.objects.filter(activa=True):
-            # Crea una nueva Asistencia
-            asistencia = Asistencia.objects.create(periodo=self, disciplina=disciplina)
-
-            for dia in range(1, num_dias + 1):
-                dia_nombre = DIAS[calendar.weekday(int(self.anio), int(self.mes), dia)][1]
-
-                # Si la disciplina tiene un horario para este día
-                if disciplina.horario.filter(dia=str(calendar.weekday(int(self.anio), int(self.mes), dia) + 1)).exists():
-                    # Crea un nuevo DetallePeriodo para este día y esta disciplina
-                    detalle_periodo = DetallePeriodo.objects.create(
-                        periodo=self,
-                        dia_nombre=dia_nombre,
-                        dia_numero=dia,
-                    )
-
-                    # Para cada alumno inscripto en la disciplina y activo
-                    for inscripcion in Inscripcion.objects.filter(disciplina=disciplina, activa=True):
-                        # Crea un nuevo DetalleAsistencia
-                        DetalleAsistencia.objects.create(
-                            asistencia=asistencia,
-                            detalle_periodo=detalle_periodo,
-                            alumno=inscripcion.alumno,
-                        )
 
     def __str__(self):
         return str(self.anio) + " - " + self.get_mes_display()
@@ -307,6 +323,7 @@ class Cuota(models.Model):
     def generar_detalles(self):
         inscripciones_activas = Inscripcion.objects.filter(activa=True)
         alumnos = {}
+
         for inscripcion in inscripciones_activas:
             alumno = inscripcion.alumno
             tipo = inscripcion.disciplina.tipo
@@ -332,6 +349,10 @@ class Cuota(models.Model):
                     monto = tipo.precio_semana_3
                 elif veces_por_semana > 3:
                     monto = tipo.precio_libre
+
+                if alumno.beca and alumno.descuento:
+                    monto = monto * (1 - (alumno.descuento / 100.0))
+
                 monto_total += monto
                 descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
 
