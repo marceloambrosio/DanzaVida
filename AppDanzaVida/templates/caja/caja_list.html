@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load caja_tags %}
 
 {% block content %}
 <div class="container mt-5">
@@ -13,17 +14,17 @@
                 <th scope="col" class="col-1">Sucursal</th>
                 <th scope="col" class="col-2">Fecha</th>
                 <th scope="col" class="col-1">Cerrada</th>
-                <th scope="col" class="col-6">Saldos</th>
-                <th scope="col" class="col-2">Acciones</th>
+                <th scope="col" class="col-5">Saldos</th>
+                <th scope="col" class="col-3">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for caja in object_list %}
-            <tr>
+            <tr class="{% if caja.cerrada %}table-success{% else %}table-danger{% endif %}">
                 <td>{{ caja.sucursal.nombre }}</td>
                 <td>{{ caja.fecha|date:"d/m/Y" }}</td>
                 <td>{% if caja.cerrada %}Sí{% else %}No{% endif %}</td>
-                <td><b>${{ caja.calcular_saldo_total }}</b> (Ef: ${{ caja.saldo_efectivo }} - Banco: ${{ caja.saldo_transferencia }})</td>
+                <td><b>${% saldo_total caja.id %}</b> (Ef: ${% saldo_efectivo caja.id %} - Banco: ${% saldo_transferencia caja.id %})</td>
                 <td>
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Imprimir">
                     <button type="button" class="btn" style="background-color: #6895D2;" onclick="window.open('{% url 'caja_pdf' caja.id %}')"><i class="bi bi-printer"></i></button>
@@ -38,6 +39,16 @@
                     <button type="button" class="btn" style="background-color: #9DBC98;" onclick="window.location.href='{% url 'caja_update' caja.id %}'"><i class="bi bi-pencil"></i></button>
                   </span>
                   {% endif %}
+                  {% if perms.AppDanzaVida.change_caja %}
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar caja">
+                          <form action="{% url 'caja_cierre' caja.id %}" method="post" style="display:inline;">
+                              {% csrf_token %}
+                              <button type="submit" class="btn" style="background-color: #CD5C08;">
+                                  <i class="bi bi-receipt-cutoff"></i>
+                              </button>
+                          </form>
+                      </span>
+                  {% endif %}
                   {% if perms.AppDanzaVida.delete_caja %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
                     <button type="button" class="btn" style="background-color: #D24545;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ caja.id }}"><i class="bi bi-trash"></i></button>
@@ -45,6 +56,26 @@
                   {% endif %}
                 </td>
               </tr>
+              <!-- Inicio Modal Cierre Caja -->
+              <div class="modal fade" id="deleteModal{{ caja.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p class="text-center">¿Estás seguro de que deseas eliminar la caja del día <b>{{ caja.fecha|date:"d/m/Y" }}</b> junto con todos los movimientos generados?</p>
+                      <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <a href="{% url 'caja_delete' caja.id %}" class="btn btn-danger">Eliminar</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Fin Modal Cierre Caja -->
               <!-- Inicio Modal Eliminar -->
               <div class="modal fade" id="deleteModal{{ caja.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -83,7 +114,7 @@
 <script>
 $(document).ready(function() {
     var table = $('#cajaTable').DataTable({
-        "order": [[ 0, "asc" ]],
+        "order": [[ 1, "desc"],[0, "asc"]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
             "sLengthMenu": "_MENU_",

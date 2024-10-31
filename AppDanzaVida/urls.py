@@ -57,6 +57,7 @@ urlpatterns = [
     path('caja_update/<int:pk>', login_required(CajaUpdateView.as_view()), name='caja_update'),
     path('caja_delete/<int:pk>', login_required(CajaDeleteView.as_view()), name='caja_delete'),
     path('caja_pdf/<int:pk>', login_required(CajaPDFView.as_view()), name='caja_pdf'),
+    path('caja_cierre/<int:pk>', login_required(CajaCierreView.as_view()), name='caja_cierre'),
     path('categoria_caja_create', login_required(CategoriaCajaCreateView.as_view()), name='categoria_caja_create'),
     path('categoria_caja_list', login_required(CategoriaCajaListView.as_view()), name='categoria_caja_list'),
     path('categoria_caja_update/<int:pk>', login_required(CategoriaCajaUpdateView.as_view()), name='categoria_caja_update'),

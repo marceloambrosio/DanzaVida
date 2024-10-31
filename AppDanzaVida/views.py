@@ -361,13 +361,6 @@ class CuotaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     context_object_name = 'cuotas'
     permission_required = 'AppDanzaVida.view_cuota'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        detalles = DetalleCuota.objects.all()
-        context['total_generado'] = detalles.aggregate(Sum('monto'))['monto__sum'] or 0
-        context['total_pagado'] = detalles.filter(pagada=True).aggregate(Sum('monto'))['monto__sum'] or 0
-        return context
-
 class CuotaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Cuota
     form_class = CuotaForm
@@ -423,47 +416,45 @@ def actualizar_cuotas(request, periodo_id):
     cambios = []
 
     # Verificar y actualizar cuotas existentes
-    for cuota in cuotas:
-        inscripciones_activas = Inscripcion.objects.filter(activa=True)
-        alumnos = {}
-        for inscripcion in inscripciones_activas:
-            alumno = inscripcion.alumno
-            tipo = inscripcion.disciplina.tipo
-            veces_por_semana = inscripcion.disciplina.veces_por_semana()
-            if alumno not in alumnos:
-                alumnos[alumno] = {'tipos': {tipo: veces_por_semana}, 'disciplinas': [inscripcion.disciplina]}
+    inscripciones_activas = Inscripcion.objects.filter(activa=True)  # Mover esto fuera del bucle para optimizar
+    alumnos = {}
+    for inscripcion in inscripciones_activas:
+        alumno = inscripcion.alumno
+        tipo = inscripcion.disciplina.tipo
+        veces_por_semana = inscripcion.disciplina.veces_por_semana()
+        if alumno not in alumnos:
+            alumnos[alumno] = {'tipos': {tipo: veces_por_semana}, 'disciplinas': [inscripcion.disciplina]}
+        else:
+            if tipo not in alumnos[alumno]['tipos']:
+                alumnos[alumno]['tipos'][tipo] = veces_por_semana
             else:
-                if tipo not in alumnos[alumno]['tipos']:
-                    alumnos[alumno]['tipos'][tipo] = veces_por_semana
-                else:
-                    alumnos[alumno]['tipos'][tipo] += veces_por_semana
-                alumnos[alumno]['disciplinas'].append(inscripcion.disciplina)
+                alumnos[alumno]['tipos'][tipo] += veces_por_semana
+            alumnos[alumno]['disciplinas'].append(inscripcion.disciplina)
+    
+    for alumno, data in alumnos.items():
+        monto_total = 0
+        descripcion = ''
+        for tipo, veces_por_semana in data['tipos'].items():
+            if veces_por_semana == 1:
+                monto = tipo.precio_semana_1
+            elif veces_por_semana == 2:
+                monto = tipo.precio_semana_2
+            elif veces_por_semana == 3:
+                monto = tipo.precio_semana_3
+            elif veces_por_semana > 3:
+                monto = tipo.precio_libre
 
-        for alumno, data in alumnos.items():
-            monto_total = 0
-            descripcion = ''
-            for tipo, veces_por_semana in data['tipos'].items():
-                if veces_por_semana == 1:
-                    monto = tipo.precio_semana_1
-                elif veces_por_semana == 2:
-                    monto = tipo.precio_semana_2
-                elif veces_por_semana == 3:
-                    monto = tipo.precio_semana_3
-                elif veces_por_semana > 3:
-                    monto = tipo.precio_libre
+            if alumno.beca and alumno.descuento:
+                monto = monto * (1 - (alumno.descuento / 100.0))
+            monto_total += monto
+            descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
 
-                if alumno.beca and alumno.descuento:
-                    monto = monto * (1 - (alumno.descuento / 100.0))
-
-                monto_total += monto
-                descripcion += ', '.join([disciplina.nombre for disciplina in data['disciplinas'] if disciplina.tipo == tipo]) + '; '
-
+        for cuota in cuotas:
             # Verificar si ya existe un DetalleCuota con el mismo alumno
             detalle_existente = DetalleCuota.objects.filter(
                 cuota=cuota,
                 alumno=alumno
             ).first()
-
             if detalle_existente:
                 # Si existe, actualizar el monto y la descripción si son diferentes
                 if detalle_existente.monto != monto_total or detalle_existente.descripcion != descripcion:
@@ -492,7 +483,6 @@ def actualizar_cuotas(request, periodo_id):
                 cuota=cambio['cuota'],
                 alumno=cambio['alumno']
             ).first()
-
             if detalle_existente:
                 detalle_existente.monto = cambio['monto_nuevo']
                 detalle_existente.descripcion = cambio['descripcion_nueva']
@@ -505,7 +495,6 @@ def actualizar_cuotas(request, periodo_id):
                     descripcion=cambio['descripcion_nueva']
                 )
                 detalle.save()
-
         return redirect('cuota_list')
 
     return redirect('actualizar_cuotas_mostrar', periodo_id=periodo.id)
@@ -727,6 +716,37 @@ class CajaPDFView(View):
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename=Caja_{caja.sucursal.nombre}_{caja.fecha}.pdf'
         return response
+
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.views.generic.edit import UpdateView
+from .models import Caja, MovimientoCaja
+
+class CajaCierreView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Caja
+    fields = []  # No hay campos que necesitemos editar directamente
+    template_name = 'base_generic.html'  # Para tener una plantilla base
+    permission_required = 'AppDanzaVida.change_caja'
+    success_url = reverse_lazy('caja_list')
+
+    def form_valid(self, form):
+        caja = form.save(commit=False)
+
+        # Calcular saldo efectivo
+        movimientos_efectivo = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Efectivo')
+        ingresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Ingreso')
+        egresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Egreso')
+        caja.saldo_efectivo = ingresos - egresos
+
+        # Calcular saldo transferencia
+        movimientos_transferencia = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Transferencia')
+        ingresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Ingreso')
+        egresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Egreso')
+        caja.saldo_transferencia = ingresos - egresos
+
+        caja.cerrada = True
+        caja.save()
+        return redirect(self.success_url)
     
 class CategoriaCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = CategoriaCaja

@@ -250,22 +250,13 @@ class Caja(models.Model):
     saldo_efectivo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     saldo_transferencia = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    def calcular_saldo_efectivo(self):
-        movimientos_efectivo = self.detalle_caja.filter(metodo_pago='Efectivo')
-        ingresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Ingreso')
-        egresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Egreso')
-        self.saldo_efectivo = ingresos - egresos
-        self.save()
-
-    def calcular_saldo_transferencia(self):
-        movimientos_transferencia = self.detalle_caja.filter(metodo_pago='Transferencia')
-        ingresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Ingreso')
-        egresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Egreso')
-        self.saldo_transferencia = ingresos - egresos
-        self.save()
-
-    def calcular_saldo_total(self):
-        return self.saldo_efectivo + self.saldo_transferencia
+    def save(self, *args, **kwargs):
+        if not self.pk and Caja.objects.filter(fecha=self.fecha, sucursal=self.sucursal).exists():
+            raise ValueError('Ya existe una caja para esta fecha y sucursal.')
+        mes = str(self.fecha.month)
+        anio = self.fecha.year
+        self.periodo, _ = Periodo.objects.get_or_create(mes=mes, anio=anio)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.fecha) + " - Cerrada: " + str(self.cerrada)
@@ -295,16 +286,6 @@ class MovimientoCaja(models.Model):
 
     def __str__(self):
         return str(self.monto) + " - " + self.categoria.nombre + " - " + self.descripcion 
-    
-@receiver(post_save, sender=MovimientoCaja)
-def actualizar_saldos(sender, instance, **kwargs):
-    instance.caja.calcular_saldo_efectivo()
-    instance.caja.calcular_saldo_transferencia()
-
-@receiver(post_delete, sender=MovimientoCaja)
-def actualizar_saldos_despues_de_borrar(sender, instance, **kwargs):
-    instance.caja.calcular_saldo_efectivo()
-    instance.caja.calcular_saldo_transferencia()
 
 class Cuota(models.Model):
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, related_name='cuotas')

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load cuota_tags %}
 
 {% block content %}
 <div class="container mt-5">
@@ -28,8 +29,8 @@
                 {% else %}
                   <td><span class="badge bg-danger">{{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span></td>
                 {% endif %}
-                <td> ${{ total_generado }}</td>
-                <td> ${{ total_pagado }}</td>
+                <td> ${% total_generado cuota.id %}</td>
+                <td> ${% total_pagado cuota.id %}</td>
                 <td>
                   {% if perms.AppDanzaVida.view_cuota %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Detalle">
