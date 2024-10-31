@@ -420,7 +420,6 @@ class DetalleCuotaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
 def actualizar_cuotas(request, periodo_id):
     periodo = get_object_or_404(Periodo, id=periodo_id)
     cuotas = Cuota.objects.filter(periodo=periodo, detalles__pagada=False).distinct()
-
     cambios = []
 
     # Verificar y actualizar cuotas existentes
@@ -650,7 +649,7 @@ class PagarCuotaView(View):
         )
 
         # Obtener o crear la CategoriaCaja 'Cuota'
-        categoria, created = CategoriaCaja.objects.get_or_create(nombre='Cuota')
+        categoria, created = CategoriaCaja.objects.get_or_create(nombre='Cuota', tipo='Ingreso', descripcion='Ingreso por cuotas')
 
         # Crear un nuevo MovimientoCaja
         movimiento_caja = MovimientoCaja.objects.create(

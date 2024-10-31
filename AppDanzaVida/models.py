@@ -243,6 +243,7 @@ class DetalleAsistencia(models.Model):
         return self.detalle_periodo.__str__() + self.asistencia.disciplina.nombre +" - " + self.alumno.__str__() + " - " + str(self.presente)
 
 class Caja(models.Model):
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, related_name='cajas')
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='cajas')
     fecha = models.DateField(default=timezone.now)
     cerrada = models.BooleanField(default=False)
