@@ -22,7 +22,7 @@
             {% for caja in object_list %}
             <tr class="{% if caja.cerrada %}table-secondary{% else %}table-success{% endif %}">
                 <td>{{ caja.sucursal.nombre }}</td>
-                <td>{{ caja.fecha|date:"d/m/Y" }}</td>
+                <td>{{ caja.fecha|date:"Y/m/d" }}</td>
                 <td>{% if caja.cerrada %}Sí{% else %}No{% endif %}</td>
                 <td><b>${% saldo_total caja.id %}</b> (Ef: ${% saldo_efectivo caja.id %} - Banco: ${% saldo_transferencia caja.id %})</td>
                 <td>
