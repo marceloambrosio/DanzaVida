@@ -1,0 +1,50 @@
+{% load caja_tags %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resumen de Cajas del Periodo {{ periodo.get_mes_display }} {{ periodo.anio }}</title>
+    <style>
+        /* Tus estilos aquí */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resumen de Cajas del Periodo {{ periodo.get_mes_display }} {{ periodo.anio }}</h1>
+    {% for caja in cajas %}
+        <h2>Sucursal: {{ caja.sucursal.nombre }}</h2>
+        <h4>Fecha: {{ caja.fecha|date:"d/m/Y" }}</h4>
+        <p>Saldo Efectivo: ${% saldo_efectivo caja.id %}</p>
+        <p>Saldo Transferencia: ${% saldo_transferencia caja.id %}</p>
+        <p>Saldo Total: ${% saldo_total caja.id %}</p>
+        <h3>Movimientos:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Categoría</th>
+                    <th>Método de Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movimiento in caja.detalle_caja.all %}
+                    <tr>
+                        <td>{{ movimiento.descripcion }}</td>
+                        <td>${{ movimiento.monto }}</td>
+                        <td>{{ movimiento.categoria.nombre }}</td>
+                        <td>{{ movimiento.get_metodo_pago_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -685,6 +686,13 @@ class CajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     context_object_name = 'cajas'
     permission_required = 'AppDanzaVida.view_caja'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        periodo_id = self.kwargs.get('periodo_id')
+        if periodo_id:
+            queryset = queryset.filter(periodo_id=periodo_id)
+        return queryset
+
 class CajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Caja
     form_class = CajaForm
@@ -717,37 +725,52 @@ class CajaPDFView(View):
         response['Content-Disposition'] = f'inline; filename=Caja_{caja.sucursal.nombre}_{caja.fecha}.pdf'
         return response
 
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
-from django.views.generic.edit import UpdateView
-from .models import Caja, MovimientoCaja
+@login_required
+@permission_required('AppDanzaVida.change_caja')
+def cerrar_caja(request, pk):
+    caja = get_object_or_404(Caja, pk=pk)
 
-class CajaCierreView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = Caja
-    fields = []  # No hay campos que necesitemos editar directamente
-    template_name = 'base_generic.html'  # Para tener una plantilla base
-    permission_required = 'AppDanzaVida.change_caja'
-    success_url = reverse_lazy('caja_list')
+    # Calcular saldo efectivo
+    movimientos_efectivo = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Efectivo')
+    ingresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Ingreso')
+    egresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Egreso')
+    caja.saldo_efectivo = ingresos - egresos
 
-    def form_valid(self, form):
-        caja = form.save(commit=False)
+    # Calcular saldo transferencia
+    movimientos_transferencia = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Transferencia')
+    ingresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Ingreso')
+    egresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Egreso')
+    caja.saldo_transferencia = ingresos - egresos
 
-        # Calcular saldo efectivo
-        movimientos_efectivo = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Efectivo')
-        ingresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Ingreso')
-        egresos = sum(movimiento.monto for movimiento in movimientos_efectivo if movimiento.categoria.tipo == 'Egreso')
-        caja.saldo_efectivo = ingresos - egresos
+    caja.cerrada = True
+    caja.save()
 
-        # Calcular saldo transferencia
-        movimientos_transferencia = MovimientoCaja.objects.filter(caja=caja, metodo_pago='Transferencia')
-        ingresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Ingreso')
-        egresos = sum(movimiento.monto for movimiento in movimientos_transferencia if movimiento.categoria.tipo == 'Egreso')
-        caja.saldo_transferencia = ingresos - egresos
+    return redirect('caja_list')
 
-        caja.cerrada = True
-        caja.save()
-        return redirect(self.success_url)
-    
+class CajaPeriodoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    model = Periodo
+    template_name = "caja/caja_periodo.html"
+    context_object_name = 'periodos'
+    permission_required = 'AppDanzaVida.view_caja'
+
+class CajaPeriodoPDFView(View):
+    def get(self, request, *args, **kwargs):
+        periodo = get_object_or_404(Periodo, id=self.kwargs['periodo_id'])
+        cajas = Caja.objects.filter(periodo=periodo)
+
+        # Renderizar el template con el contexto
+        template = get_template('caja/caja_periodo_pdf.html')
+        context = {'periodo': periodo, 'cajas': cajas}
+        html = template.render(context)
+
+        # Generar el PDF
+        pdf = HTML(string=html).write_pdf()
+
+        # Crear la respuesta
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename=Resumen_Cajas_{periodo.anio}_{periodo.get_mes_display()}.pdf'
+        return response
+
 class CategoriaCajaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = CategoriaCaja
     form_class = CategoriaCajaForm

@@ -40,14 +40,9 @@
                   </span>
                   {% endif %}
                   {% if perms.AppDanzaVida.change_caja %}
-                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar caja">
-                          <form action="{% url 'caja_cierre' caja.id %}" method="post" style="display:inline;">
-                              {% csrf_token %}
-                              <button type="submit" class="btn" style="background-color: #CD5C08;">
-                                  <i class="bi bi-receipt-cutoff"></i>
-                              </button>
-                          </form>
-                      </span>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar caja">
+                    <button type="button" class="btn" style="background-color: #CD5C08;" data-bs-toggle="modal" data-bs-target="#cerrarCajaModal{{ caja.id }}"><i class="bi bi-receipt-cutoff"></i></button>
+                  </span>
                   {% endif %}
                   {% if perms.AppDanzaVida.delete_caja %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
@@ -57,20 +52,20 @@
                 </td>
               </tr>
               <!-- Inicio Modal Cierre Caja -->
-              <div class="modal fade" id="deleteModal{{ caja.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+              <div class="modal fade" id="cerrarCajaModal{{ caja.id }}" tabindex="-1" aria-labelledby="cerrarCajaModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                      <h5 class="modal-title" id="cerrarCajaModalLabel">Confirmar Cierre de Caja</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                      <p class="text-center">¿Estás seguro de que deseas eliminar la caja del día <b>{{ caja.fecha|date:"d/m/Y" }}</b> junto con todos los movimientos generados?</p>
-                      <p class="text-danger text-center"><b>¡Una vez eliminada no podrás recuperarlo!</b></p>
+                      <p class="text-center">¿Estás seguro de que deseas cerrar la caja del día <b>{{ caja.fecha|date:"d/m/Y" }}</b>?</p>
+                      <p class="text-danger text-center"><b>¡Una vez cerrada no podrás registrar ningun movimiento!</b></p>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <a href="{% url 'caja_delete' caja.id %}" class="btn btn-danger">Eliminar</a>
+                      <a href="{% url 'caja_cierre' caja.id %}" class="btn btn-danger">Cerrar</a>
                     </div>
                   </div>
                 </div>

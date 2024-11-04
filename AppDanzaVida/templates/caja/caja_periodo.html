@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load caja_tags %}
+
+{% block content %}
+<div class="container mt-5">
+  
+    <h2>Cajas {% if perms.AppDanzaVida.add_caja %}<a href="{% url 'caja_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva caja <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <br>
+    <table id="cajaTable" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="col-3">Periodo</th>
+                <th scope="col" class="col-6">Saldos</th>
+                <th scope="col" class="col-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for periodo in object_list %}
+            <tr>
+                {% with periodo.mes|default_if_none:"0"|add:"0"|stringformat:"02d" as padded_month %}
+                <td data-order="{{ periodo.anio }}-{{ padded_month }}">
+                  {{ periodo.get_mes_display }} {{ periodo.anio }}
+                </td>
+                {% endwith %}    
+                <td><b>${% saldo_total_periodo periodo.id %}</b> (Ef: ${% saldo_efectivo_periodo periodo.id %} - Banco: ${% saldo_transferencia_periodo periodo.id %})</td>
+                <td>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Imprimir">
+                    <button type="button" class="btn" style="background-color: #6895D2;" onclick="window.open('{% url 'caja_periodo_pdf' periodo.id %}')"><i class="bi bi-printer"></i></button>
+                  </span>
+                  {% if perms.AppDanzaVida.view_caja %}
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Listado de cajas">
+                      <button type="button" class="btn" style="background-color: #FFBB64;" onclick="window.location.href='{% url 'caja_list' periodo.id %}'"><i class="bi bi-list-task"></i></button>
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+  // Inicializar los tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+
+<link rel="stylesheet" href="{% static 'style/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#cajaTable').DataTable({
+        "order": [[0, "desc"]],
+        "columnDefs": [
+            { "orderDataType": "dom-data-numeric", "targets": 0 }
+        ],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json",
+            "sLengthMenu": "_MENU_",
+            "sInfo": "<h6 class='float-end'>Total de registros: _TOTAL_</h6>"
+        },
+        "initComplete": function() {
+            // Aplicar clases de Bootstrap al campo de búsqueda
+            $('div.dataTables_filter input').attr('placeholder', 'Buscar..');
+            $('div.dataTables_filter label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+
+            // Aplicar clases de Bootstrap al select de cantidad de registros a mostrar
+            $('div.dataTables_length label').contents().filter(function() {
+                return this.nodeType === 3; // Node.TEXT_NODE
+            }).remove();
+            $('div.dataTables_length label').prepend('Registros por página: ');
+
+            // Aplicar clases de Bootstrap a la paginación
+            $('div.dataTables_paginate').addClass('justify-content-center');
+            $('div.dataTables_paginate a').addClass('btn btn-primary');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        },
+        "drawCallback": function() {
+            // Aplicar clases de Bootstrap a la paginación en cada cambio de página
+            $('div.dataTables_paginate a');
+            $('div.dataTables_paginate a').css('margin', '0 2px');
+        }
+    });
+
+    // Mover el campo de búsqueda y el select de cantidad de registros a la misma fila
+    $('div.dataTables_filter').css('float', 'right');
+    $('div.dataTables_length').css('float', 'left');
+    $('div.dataTables_filter').appendTo('#cajaTable_length');
+});
+</script>
+{% endblock %}
