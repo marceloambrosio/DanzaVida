@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container mt-5">
   
-    <h2>Caja {% if perms.AppDanzaVida.add_caja %}<a href="{% url 'caja_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva caja <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+    <h2>Cajas de {{ periodo.get_mes_display }} del {{ periodo.anio }} {% if perms.AppDanzaVida.add_caja %}<a href="{% url 'caja_create' %}" class="btn float-end" style="background-color: #FF9843;">Nueva caja <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
     <br>
     <table id="cajaTable" class="table table-hover">
         <thead>

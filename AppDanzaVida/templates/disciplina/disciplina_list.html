@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load disciplina_tags %}
 
 {% block content %}
 <div class="container mt-5">
@@ -13,13 +14,13 @@
                 <th scope="col" class="col-3">Nombre</th>
                 <th scope="col" class="col-2">Tipo</th>
                 <th scope="col" class="col-1">Horario</th>
-                <th scope="col" class="col-1">Activo</th>
+                <th scope="col" class="col-1">Inscriptos</th>
                 <th scope="col" class="col-3">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for disciplina in object_list %}
-            <tr>
+            <tr class="{% if disciplina.activa %}{% else %}table-danger{% endif %}">
                 <td>{{ disciplina.sucursal.nombre }}</td>
                 <td>{{ disciplina.nombre }}</td>
                 <td>{{ disciplina.tipo.nombre }}</td>
@@ -60,13 +61,7 @@
                     </div>
                     {% endif %}
                 </td>
-                <td>
-                    {% if disciplina.activa == True %}
-                      <span class="badge bg-success rounded-pill">Activa</span>
-                    {% elif disciplina.activa == False %}
-                      <span class="badge bg-danger rounded-pill">No activa</span>
-                    {% endif %}
-                  </td>
+                <td><span class="badge bg-primary rounded-pill"><b>{% inscriptos_activos disciplina.id %}</b></span></td>
                 <td>
                   {% if perms.AppDanzaVida.change_disciplina %}
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">

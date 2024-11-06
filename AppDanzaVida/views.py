@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from decimal import Decimal
 import calendar, json
+from AppDanzaVida.templatetags.caja_tags import movimientos_por_sucursal_y_dia
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PagoCuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm
@@ -688,10 +689,16 @@ class CajaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        periodo_id = self.kwargs.get('periodo_id')
-        if periodo_id:
-            queryset = queryset.filter(periodo_id=periodo_id)
+        self.periodo_id = self.kwargs.get('periodo_id')
+        if self.periodo_id:
+            queryset = queryset.filter(periodo_id=self.periodo_id)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.periodo_id:
+            context['periodo'] = Periodo.objects.get(id=self.periodo_id)
+        return context
 
 class CajaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Caja
@@ -712,9 +719,17 @@ class CajaPDFView(View):
     def get(self, request, *args, **kwargs):
         caja = get_object_or_404(Caja, id=self.kwargs['pk'])
 
+        # Obtener movimientos
+        movimientos_efectivo = caja.detalle_caja.filter(metodo_pago='Efectivo')
+        movimientos_transferencia = caja.detalle_caja.filter(metodo_pago='Transferencia')
+
         # Renderizar el template con el contexto
         template = get_template('caja/caja_pdf.html')
-        context = {'caja': caja}
+        context = {
+            'caja': caja,
+            'movimientos_efectivo': movimientos_efectivo,
+            'movimientos_transferencia': movimientos_transferencia
+        }
         html = template.render(context)
 
         # Generar el PDF
@@ -758,9 +773,15 @@ class CajaPeriodoPDFView(View):
         periodo = get_object_or_404(Periodo, id=self.kwargs['periodo_id'])
         cajas = Caja.objects.filter(periodo=periodo)
 
+        movimientos_por_sucursal = movimientos_por_sucursal_y_dia(periodo.id)
+
         # Renderizar el template con el contexto
         template = get_template('caja/caja_periodo_pdf.html')
-        context = {'periodo': periodo, 'cajas': cajas}
+        context = {
+            'periodo': periodo,
+            'cajas': cajas,
+            'movimientos_por_sucursal': movimientos_por_sucursal
+        }
         html = template.render(context)
 
         # Generar el PDF

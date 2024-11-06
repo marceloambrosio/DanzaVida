@@ -1,45 +1,131 @@
+{% load caja_tags %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Caja de {{ caja.sucursal.nombre }} - {{ caja.fecha|date:"d/m/Y" }}</title>
     <style>
-        /* Tus estilos aquí */
+        /* Estilos para el PDF */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h4, p {
+            text-align: center;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
         th, td {
             border: 1px solid #000;
             padding: 10px;
+            text-align: left; /* Cambiado a izquierda */
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: center; /* Centrar el texto en los encabezados */
+        }
+        .saldo {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .saldos-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .saldos-table th, .saldos-table td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+        }
+        .saldos-table th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-    <h1>Movimientos de Caja de {{ caja.sucursal.nombre }}</h1>
-    <h4>Fecha: {{ caja.fecha|date:"d/m/Y" }}</h4>
-    <p>Saldo Efectivo: ${{ caja.saldo_efectivo }}</p>
-    <p>Saldo Transferencia: ${{ caja.saldo_transferencia }}</p>
-    <p>Saldo Total: ${{ caja.saldo_total }}</p>
-    <h2>Movimientos:</h2>
-    <table>
+    <h1>Caja de {{ caja.sucursal.nombre }} - {{ caja.fecha|date:"d/m/Y" }}</h1>
+    <table class="saldos-table">
         <thead>
             <tr>
-                <th>Descripción</th>
-                <th>Monto</th>
-                <th>Categoría</th>
-                <th>Método de Pago</th>
+                <th>Efectivo</th>
+                <th>Transferencia</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
-            {% for movimiento in caja.detalle_caja.all %}
+            <tr>
+                <td>${% saldo_efectivo caja.id %}</td>
+                <td>${% saldo_transferencia caja.id %}</td>
+                <td>${% saldo_total caja.id %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if movimientos_efectivo %}
+    <br>
+    <h2>Movimientos en Efectivo</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Ingreso</th>
+                <th>Egreso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimiento in movimientos_efectivo %}
                 <tr>
-                    <td>{{ movimiento.descripcion }}</td>
-                    <td>${{ movimiento.monto }}</td>
                     <td>{{ movimiento.categoria.nombre }}</td>
-                    <td>{{ movimiento.get_metodo_pago_display }}</td>
+                    <td>{{ movimiento.descripcion }}</td>
+                    <td>{% if movimiento.categoria.tipo == 'Ingreso' %} ${{ movimiento.monto }} {% endif %}</td>
+                    <td>{% if movimiento.categoria.tipo == 'Egreso' %} ${{ movimiento.monto }} {% endif %}</td>
                 </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr class="saldo">
+                <td colspan="2" style="text-align: right;">Saldo Efectivo</td>
+                <td colspan="2" style="text-align: center;"><strong>${% saldo_movimientos_efectivo caja.id %}</strong></td>
+            </tr>
+        </tfoot>
     </table>
+    {% endif %}
+
+    {% if movimientos_transferencia %}
+    <br>
+    <h2>Movimientos en Transferencia</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Ingreso</th>
+                <th>Egreso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimiento in movimientos_transferencia %}
+                <tr>
+                    <td>{{ movimiento.categoria.nombre }}</td>
+                    <td>{{ movimiento.descripcion }}</td>
+                    <td>{% if movimiento.categoria.tipo == 'Ingreso' %} ${{ movimiento.monto }} {% endif %}</td>
+                    <td>{% if movimiento.categoria.tipo == 'Egreso' %} ${{ movimiento.monto }} {% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="saldo">
+                <td colspan="2" style="text-align: right;">Saldo Transferencia</td>
+                <td colspan="2" style="text-align: center;"><strong>${% saldo_movimientos_transferencia caja.id %}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% endif %}
+
 </body>
 </html>
