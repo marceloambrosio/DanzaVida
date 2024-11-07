@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-5">
   
-  <h2>Movimientos de Caja del {{ caja.fecha|date:"d/m/Y" }} {% if perms.AppDanzaVida.add_movimientocaja %}<a href="{% url 'movimiento_caja_create' caja.id %}" class="btn float-end" style="background-color: #FF9843;">Nuevo movimiento <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
+  <h2>Movimientos de Caja del {{ caja.fecha|date:"d/m/Y" }} <a href="{% url 'caja_list' periodo_id=caja.periodo.id %}" class="btn" style="background-color: #A6AEBF;">Volver <i class="bi bi-arrow-return-left"></i></a> {% if perms.AppDanzaVida.add_movimientocaja %}<a href="{% url 'movimiento_caja_create' caja.id %}" class="btn float-end" style="background-color: #FF9843;">Nuevo movimiento <i class="bi bi-file-earmark-plus"></i></a>{% endif %}</h2>
     <br>
     <table id="movimientoCajaTable" class="table table-hover">
         <thead>
@@ -22,7 +22,12 @@
             <tr>
                 <td>{{ movimientocaja.categoria.tipo }}</td>
                 <td>${{ movimientocaja.monto }}</td>
-                <td>{{ movimientocaja.categoria.nombre }}</td>
+                <td>{% if movimientocaja.categoria.tipo == 'Ingreso' %}
+                  <span class="badge bg-success rounded-pill">{{ movimientocaja.categoria.nombre }}</span>
+                  {% else %}
+                  <span class="badge bg-danger rounded-pill">{{ movimientocaja.categoria.nombre }}</span>
+                  {% endif %}
+                </td>
                 <td>{{ movimientocaja.descripcion }}</td>
                 <td>
                   {% if perms.AppDanzaVida.change_movimientocaja %}

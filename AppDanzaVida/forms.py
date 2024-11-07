@@ -113,14 +113,17 @@ class PeriodoForm(forms.ModelForm):
             'mes': Select(attrs={'class': 'form-control'}),
         }
 
-class CuotaForm(forms.ModelForm):
-    class Meta:
-        model = Cuota
-        fields = ['periodo', 'fecha_vencimiento']
-        widgets = {
-            'periodo': Select(attrs={'class': 'form-control'}),
-            'fecha_vencimiento': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-        }
+class CuotaForm(forms.ModelForm): 
+    class Meta: 
+        model = Cuota 
+        fields = ['periodo', 'fecha_vencimiento'] 
+        widgets = { 'periodo': Select(attrs={'class': 'form-control'}), 'fecha_vencimiento': DateInput(attrs={'class': 'form-control', 'type': 'date'}), }
+
+class GenerarCuotaEspecialForm(forms.Form):
+    cuota = forms.ModelChoiceField(queryset=Cuota.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
+    disciplina = forms.ModelChoiceField(queryset=Disciplina.objects.filter(activa=True), widget=forms.Select(attrs={'class': 'form-control'}))
+    monto = forms.DecimalField(max_digits=8, decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    descripcion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 class CajaForm(forms.ModelForm):
     class Meta:

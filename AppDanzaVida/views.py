@@ -15,7 +15,7 @@ import calendar, json
 from AppDanzaVida.templatetags.caja_tags import movimientos_por_sucursal_y_dia
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PagoCuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm
+from .forms import AlumnoForm, TipoDisciplinaForm, HorarioDisciplinaForm, DisciplinaForm, InscripcionForm, CuotaForm, PagoCuotaForm, PeriodoForm, CajaForm, CategoriaCajaForm, MovimientoCajaForm, GenerarCuotaEspecialForm
 from .models import Sucursal, Alumno, TipoDisciplina, HorarioDisciplina, Disciplina, Inscripcion, Cuota, DetalleCuota, Periodo, DetallePeriodo, Asistencia, DetalleAsistencia, Caja, CategoriaCaja, MovimientoCaja
 
 # Create your views here.
@@ -623,6 +623,58 @@ def actualizar_cuotas_vencimiento(request, periodo_id):
 
     return redirect('actualizar_cuotas_vencimiento_mostrar', periodo_id=periodo.id)
 
+def cuota_especial_mostrar(request):
+    if request.method == 'POST':
+        form = GenerarCuotaEspecialForm(request.POST)
+        if form.is_valid():
+            cuota = form.cleaned_data['cuota']
+            disciplina = form.cleaned_data['disciplina']
+            monto = form.cleaned_data['monto']
+            descripcion = form.cleaned_data['descripcion']
+            
+            inscripciones_activas = Inscripcion.objects.filter(disciplina=disciplina, activa=True)
+            alumnos = [inscripcion.alumno for inscripcion in inscripciones_activas]
+            
+            print(f"Cuota: {cuota}, Disciplina: {disciplina}, Monto: {monto}, Descripción: {descripcion}")
+            print(f"Alumnos: {alumnos}")
+            
+            return render(request, 'cuota/cuota_especial_mostrar.html', {
+                'cuota': cuota,
+                'disciplina': disciplina,
+                'monto': monto,
+                'descripcion': descripcion,
+                'alumnos': alumnos,
+            })
+        else:
+            print("Form is not valid")
+            print(form.errors)
+    else:
+        form = GenerarCuotaEspecialForm()
+    
+    return render(request, 'cuota/cuota_especial_create.html', {'form': form})
+
+def confirmar_cuota_especial(request):
+    if request.method == 'POST':
+        cuota_id = request.POST.get('cuota_id')
+        disciplina_id = request.POST.get('disciplina_id')
+        monto = request.POST.get('monto')
+        descripcion = request.POST.get('descripcion')
+        
+        cuota = get_object_or_404(Cuota, id=cuota_id)
+        disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+        
+        inscripciones_activas = Inscripcion.objects.filter(disciplina=disciplina, activa=True)
+        
+        for inscripcion in inscripciones_activas:
+            alumno = inscripcion.alumno
+            detalle = DetalleCuota(cuota=cuota, alumno=alumno, monto=monto, descripcion=descripcion)
+            detalle.save()
+        
+        return redirect('cuota_list')
+    
+    return redirect('generar_cuota_especial')
+
+
 class PagarCuotaView(View):
     def post(self, request, *args, **kwargs):
         detalle_cuota = get_object_or_404(DetalleCuota, id=self.kwargs['pk'])
@@ -645,7 +697,7 @@ class PagarCuotaView(View):
         # Crear un nuevo MovimientoCaja
         movimiento_caja = MovimientoCaja.objects.create(
             caja=caja,
-            descripcion=f'Cuota del mes {detalle_cuota.cuota.periodo.get_mes_display()} de {detalle_cuota.alumno.apellido} {detalle_cuota.alumno.nombre}',
+            descripcion=f'Cuota {detalle_cuota.cuota.periodo.get_mes_display()} ({detalle_cuota.descripcion}) de {detalle_cuota.alumno.apellido} {detalle_cuota.alumno.nombre}',
             monto=detalle_cuota.monto,
             categoria=categoria,
             metodo_pago=metodo_pago

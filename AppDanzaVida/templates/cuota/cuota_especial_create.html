@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<br>
+<div id="spinner"></div>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Generar Cuota Especial</h4>
+        <form id="cuotaEspecialForm" method="POST" enctype="multipart/form-data" action="{% url 'cuota_especial_mostrar' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Cuota (*)</h6>
+                        {{ form.cuota }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Disciplina (*)</h6>
+                        {{ form.disciplina }}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-6">
+                        <h6>Monto (*)</h6>
+                        {{ form.monto }}
+                    </div>
+                    <div class="col-6">
+                        <h6>Descripción (*)</h6>
+                        {{ form.descripcion }}
+                    </div>
+                </div>
+                <br>
+            </div>
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Previsualizar</button>
+        </form>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'style/select2.min.css' %}">
+<script src="{% static 'js/select2.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('#cuotaEspecialForm').on('submit', function() {
+            $('#spinner').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#spinner').hide();
+        });
+    });
+
+    $(document).ready(function() {
+        $('#id_cuota, #id_disciplina').select2();
+    });
+</script>
+    
+{% endblock %}

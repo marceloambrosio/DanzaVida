@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<br>
+<div class="card" style="width: 100%;">
+    <div class="card-body">
+        <h4 class="card-title">Previsualizar Cuota Especial</h4>
+        <br>
+        <p><strong>Cuota:</strong> {{ cuota.periodo.get_mes_display }} {{ cuota.periodo.anio }}</p>
+        <p><strong>Disciplina:</strong> {{ disciplina.nombre }} ({{ disciplina.tipo.nombre }})</p>
+        <p><strong>Monto:</strong> ${{ monto }}</p>
+        <p><strong>Descripción:</strong> {{ descripcion }}</p>
+        
+        <h5>Alumnos</h5>
+        <ul>
+            {% for alumno in alumnos %}
+            <li>{{ alumno.nombre }} {{ alumno.apellido }} - {{ alumno.dni }}</li>
+            {% endfor %}
+        </ul>
+        
+        <form method="post" action="{% url 'cuota_especial_confirmar' %}">
+            {% csrf_token %}
+            <input type="hidden" name="cuota_id" value="{{ cuota.id }}">
+            <input type="hidden" name="disciplina_id" value="{{ disciplina.id }}">
+            <input type="hidden" name="monto" value="{{ monto }}">
+            <input type="hidden" name="descripcion" value="{{ descripcion }}">
+            <button class="btn float-end" style="background-color: #FF9843;" type="submit">Confirmar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
